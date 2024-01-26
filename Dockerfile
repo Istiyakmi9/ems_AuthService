@@ -6,6 +6,9 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
+
+ENV ASPNETCORE_ENVIRONMENT Production
+
 COPY ["ems_AuthService/ems_AuthService.csproj", "ems_AuthService/"]
 COPY ["ems_AuthServiceLayer/ems_AuthServiceLayer.csproj", "ems_AuthServiceLayer/"]
 RUN dotnet restore "ems_AuthService/ems_AuthService.csproj"
