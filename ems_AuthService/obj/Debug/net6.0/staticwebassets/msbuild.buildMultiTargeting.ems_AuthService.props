@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\ems_AuthService.props" />
+</Project>
