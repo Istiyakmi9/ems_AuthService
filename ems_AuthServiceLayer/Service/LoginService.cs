@@ -1,5 +1,6 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
 using Bot.CoreBottomHalf.CommonModal.HtmlTemplateModel;
+using BottomHalf.Utilities.UtilService;
 using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.Services.Code;
 using CoreBottomHalf.CommonModal.HtmlTemplateModel;
@@ -133,7 +134,7 @@ namespace ems_AuthServiceLayer.Service
             if ((!string.IsNullOrEmpty(authUser.EmailId) || !string.IsNullOrEmpty(authUser.Mobile)) && !string.IsNullOrEmpty(authUser.Password))
             {
                 var encryptedPassword = this.GetUserLoginDetail(authUser);
-                encryptedPassword = _authenticationService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
+                encryptedPassword = UtilService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
                 if (encryptedPassword.CompareTo(authUser.Password) != 0)
                 {
                     throw new HiringBellException("Invalid userId or password.");
@@ -238,11 +239,11 @@ namespace ems_AuthServiceLayer.Service
         {
             string Status = string.Empty;
             var encryptedPassword = this.FetchUserLoginDetail(authUser);
-            encryptedPassword = _authenticationService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
+            encryptedPassword = UtilService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
             if (encryptedPassword != authUser.Password)
                 throw new HiringBellException("Incorrect old password");
 
-            string newEncryptedPassword = _authenticationService.Encrypt(authUser.NewPassword, _configuration.GetSection("EncryptSecret").Value);
+            string newEncryptedPassword = UtilService.Encrypt(authUser.NewPassword, _configuration.GetSection("EncryptSecret").Value);
             var result = db.Execute<string>("sp_Reset_Password", new
             {
                 EmailId = authUser.EmailId,
@@ -284,7 +285,7 @@ namespace ems_AuthServiceLayer.Service
 
                 registrationForm.FirstName = "Admin";
                 registrationForm.LastName = "User";
-                string EncreptedPassword = _authenticationService.Encrypt(
+                string EncreptedPassword = UtilService.Encrypt(
                     _configuration.GetSection("DefaultNewEmployeePassword").Value,
                     _configuration.GetSection("EncryptSecret").Value
                 );
@@ -319,7 +320,7 @@ namespace ems_AuthServiceLayer.Service
                 if (string.IsNullOrEmpty(encryptedPassword))
                     throw new HiringBellException("Email id is not registered. Please contact to admin");
 
-                var password = _authenticationService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
+                var password = UtilService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
 
                 //await _forgotPasswordEmailService.SendForgotPasswordEmail(password, email);
                 ForgotPasswordTemplateModel forgotPasswordTemplateModel = new ForgotPasswordTemplateModel
