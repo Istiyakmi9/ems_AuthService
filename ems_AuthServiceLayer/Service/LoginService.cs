@@ -174,7 +174,7 @@ namespace ems_AuthServiceLayer.Service
                 MobileNo = authUser.Mobile,
                 EmailId = authUser.EmailId,
                 UserTypeId = authUser.UserTypeId,
-                PageSize = 1000
+                PageSize = 50
             });
 
             if (ds != null && ds.Tables.Count == 8)
