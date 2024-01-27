@@ -10,10 +10,13 @@ using ems_AuthService.Middlewares;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using ems_AuthServiceLayer.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using ModalLayer;
 using Newtonsoft.Json.Serialization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +70,26 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
 });
 
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+   .AddJwtBearer(x =>
+   {
+       x.SaveToken = true;
+       x.RequireHttpsMetadata = false;
+       x.TokenValidationParameters = new TokenValidationParameters
+       {
+           ValidateIssuer = false,
+           ValidateAudience = false,
+           ValidateLifetime = true,
+           ValidateIssuerSigningKey = true,
+           IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSetting:Key"])),
+           ClockSkew = TimeSpan.Zero
+       };
+   });
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("bottomhalf-cors", policy =>
@@ -111,6 +134,7 @@ app.MapGet("/weatherforecast", () =>
 
 app.UseCors("bottomhalf-cors");
 app.UseMiddleware<RequestMiddleware>();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseEndpoints(endpoints => endpoints.MapControllers());
 app.MapControllers();

@@ -1,12 +1,14 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
 using Bot.CoreBottomHalf.CommonModal.API;
 using ems_AuthServiceLayer.Contracts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace ems_AuthService.Controller
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class LoginController : BaseController
