@@ -8,6 +8,7 @@ using Confluent.Kafka;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using ems_AuthService.Middlewares;
 using ems_AuthServiceLayer.Contracts;
+using ems_AuthServiceLayer.Models;
 using ems_AuthServiceLayer.Service;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Options;
@@ -30,6 +31,7 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddSingleton<IDb, Db>();
 builder.Services.AddSingleton<ITimezoneConverter, TimezoneConverter>();
+builder.Services.AddSingleton<ApplicationConfiguration>();
 
 var kafkaServerDetail = new ProducerConfig();
 builder.Configuration.Bind("KafkaServerDetail", kafkaServerDetail);
@@ -84,7 +86,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseRouting();
+
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"

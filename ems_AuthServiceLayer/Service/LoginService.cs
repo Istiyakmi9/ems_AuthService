@@ -1,4 +1,5 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
+using Bot.CoreBottomHalf.CommonModal.Enums;
 using Bot.CoreBottomHalf.CommonModal.HtmlTemplateModel;
 using BottomHalf.Utilities.UtilService;
 using BottomhalfCore.DatabaseLayer.Common.Code;
@@ -8,6 +9,7 @@ using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net.Mail;
@@ -66,19 +68,37 @@ namespace ems_AuthServiceLayer.Service
                 authUser.EmailId
             });
 
-            if (loginDetail != null)
-            {
-                encryptedPassword = loginDetail.Password;
-                authUser.OrganizationId = loginDetail.OrganizationId;
-                authUser.CompanyId = loginDetail.CompanyId;
-                authUser.UserTypeId = loginDetail.UserTypeId;
-            }
-            else
-            {
+            if (loginDetail == null)
                 throw new HiringBellException("Please enter a valid email address or mobile number.");
-            }
+
+            encryptedPassword = loginDetail.Password;
+            authUser.OrganizationId = loginDetail.OrganizationId;
+            authUser.CompanyId = loginDetail.CompanyId;
+            authUser.UserTypeId = loginDetail.UserTypeId;
+
+            ValidePasswordStatus(loginDetail);
 
             return encryptedPassword;
+        }
+
+        private void ValidePasswordStatus(LoginDetail loginDetail)
+        {
+            if(loginDetail.UserTypeId == 101)
+            {
+                var applicationSettings = db.Get<ApplicationSettings>("sp_application_setting_get_by_compid", new
+                {
+                    loginDetail.CompanyId,
+                    SettingsCatagoryId = 2
+                });
+
+                if (applicationSettings == null || string.IsNullOrEmpty(applicationSettings.SettingDetails))
+                    throw HiringBellException.ThrowBadRequest("Your password got expired. Please contact to admin.");
+
+                var passwordSettings = JsonConvert.DeserializeObject<PasswordSettings>(applicationSettings.SettingDetails);
+
+                if(DateTime.UtcNow.Subtract(loginDetail.UpdatedOn).TotalSeconds > passwordSettings.TemporaryPasswordExpiryTimeInSeconds)
+                    throw HiringBellException.ThrowBadRequest("Your temporary password got expired. Please reset again.");
+            }
         }
 
         public string FetchUserLoginDetail(UserDetail authUser)
@@ -246,12 +266,13 @@ namespace ems_AuthServiceLayer.Service
             string newEncryptedPassword = UtilService.Encrypt(authUser.NewPassword, _configuration.GetSection("EncryptSecret").Value);
             var result = db.Execute<string>("sp_Reset_Password", new
             {
-                EmailId = authUser.EmailId,
+                authUser.EmailId,
                 MobileNo = authUser.Mobile,
                 NewPassword = newEncryptedPassword,
+                UserTypeId = UserType.Employee
             }, true);
 
-            if (result == "Update")
+            if (result == ApplicationConstants.Updated)
             {
                 Status = "Password changed successfully, Please logout and login again";
             }
@@ -320,13 +341,27 @@ namespace ems_AuthServiceLayer.Service
                 if (string.IsNullOrEmpty(encryptedPassword))
                     throw new HiringBellException("Email id is not registered. Please contact to admin");
 
-                var password = UtilService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
+                string newPassword = GenerateRandomPassword(10);
+                newPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
+
+                var result = db.Execute<string>("sp_Reset_Password", new
+                {
+                    authUser.EmailId,
+                    MobileNo = authUser.Mobile,
+                    NewPassword = newPassword,
+                    UserTypeId = 101
+                }, true);
+
+                if (result.ToLower() != ApplicationConstants.Updated)
+                {
+                    throw new HiringBellException("Unable to reset your password");
+                }
 
                 //await _forgotPasswordEmailService.SendForgotPasswordEmail(password, email);
                 ForgotPasswordTemplateModel forgotPasswordTemplateModel = new ForgotPasswordTemplateModel
                 {
                     CompanyName = authUser.CompanyName,
-                    NewPassword = password,
+                    NewPassword = newPassword,
                     ToAddress = new List<string> { email },
                     kafkaServiceName = KafkaServiceName.ForgotPassword,
                     LocalConnectionString = _currentSession.LocalConnectionString,
@@ -351,6 +386,47 @@ namespace ems_AuthServiceLayer.Service
             bool isValidEmail = mail.Host.Contains(".");
             if (!isValidEmail)
                 throw new HiringBellException("The email is invalid");
+        }
+
+        public string GenerateRandomPassword(int length)
+        {
+            const string upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
+            const string numericChars = "0123456789";
+            const string specialChars = "!@#$%^&*-_+=";
+
+            if (length < 6 || length > 16)
+            {
+                throw new ArgumentOutOfRangeException("length", "Password length should be between 8 and 16 characters.");
+            }
+
+            Random random = new Random();
+
+            // Ensure at least one character from each character set
+            char upperCaseChar = upperCaseChars[random.Next(upperCaseChars.Length)];
+            char lowerCaseChar = lowerCaseChars[random.Next(lowerCaseChars.Length)];
+            char numericChar = numericChars[random.Next(numericChars.Length)];
+            char specialChar = specialChars[random.Next(specialChars.Length)];
+
+            // Combine characters from all character sets
+            string allChars = upperCaseChars + lowerCaseChars + numericChars + specialChars;
+
+            // Generate the remaining characters randomly
+            string randomChars = new string(Enumerable.Repeat(allChars, length - 4)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            // Shuffle the characters to ensure randomness
+            string combinedChars = new string(new[] { upperCaseChar, lowerCaseChar, numericChar, specialChar }.Concat(randomChars).OrderBy(c => random.Next()).ToArray());
+
+            // Ensure that the password starts with a character
+            if (char.IsDigit(combinedChars[0]))
+            {
+                // Swap the first digit with a random character
+                char randomStartChar = allChars[random.Next(allChars.Length)];
+                combinedChars = randomStartChar + combinedChars.Substring(1);
+            }
+
+            return combinedChars;
         }
     }
 }
