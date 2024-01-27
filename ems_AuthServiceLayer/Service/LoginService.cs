@@ -268,7 +268,7 @@ namespace ems_AuthServiceLayer.Service
                 authUser.EmailId,
                 MobileNo = authUser.Mobile,
                 NewPassword = newEncryptedPassword,
-                UserTypeId = UserType.Employee
+                UserTypeId = (int)UserType.Employee
             }, true);
 
             if (result == ApplicationConstants.Updated)
