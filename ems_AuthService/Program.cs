@@ -5,9 +5,11 @@ using BottomhalfCore.DatabaseLayer.MySql.Code;
 using BottomhalfCore.Services.Code;
 using BottomhalfCore.Services.Interface;
 using Confluent.Kafka;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using ems_AuthService.Middlewares;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Service;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Options;
 using ModalLayer;
 using Newtonsoft.Json.Serialization;
@@ -63,6 +65,17 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("bottomhalf-cors", policy =>
+    {
+        policy.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .WithExposedHeaders("Authorization");
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -91,6 +104,7 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
+app.UseCors("bottomhalf-cors");
 app.UseMiddleware<RequestMiddleware>();
 app.UseAuthorization();
 app.UseEndpoints(endpoints => endpoints.MapControllers());

@@ -62,7 +62,7 @@ namespace ems_AuthServiceLayer.Service
             switch (userDetail.RoleId)
             {
                 case 1:
-                    role = Role.AllRole;
+                    role = Role.Admin;
                     break;
                 case 2:
                     role = Role.Employee;
