@@ -341,13 +341,13 @@ namespace ems_AuthServiceLayer.Service
                     throw new HiringBellException("Email id is not registered. Please contact to admin");
 
                 string newPassword = GenerateRandomPassword(10);
-                newPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
+                var enNewPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
 
                 var result = db.Execute<string>("sp_Reset_Password", new
                 {
                     authUser.EmailId,
                     MobileNo = authUser.Mobile,
-                    NewPassword = newPassword,
+                    NewPassword = enNewPassword,
                     UserTypeId = 101
                 }, true);
 
