@@ -9,7 +9,6 @@ using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net.Mail;
