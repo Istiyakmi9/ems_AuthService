@@ -170,10 +170,10 @@ namespace ems_AuthServiceLayer.Service
             LoginResponse loginResponse = default;
             DataSet ds = await db.GetDataSetAsync(ProcedureName, new
             {
-                UserId = authUser.UserId,
+                authUser.UserId,
                 MobileNo = authUser.Mobile,
-                EmailId = authUser.EmailId,
-                UserTypeId = authUser.UserTypeId,
+                authUser.EmailId,
+                authUser.UserTypeId,
                 PageSize = 50
             });
 
@@ -184,6 +184,11 @@ namespace ems_AuthServiceLayer.Service
                     loginResponse = new LoginResponse();
                     var loginDetail = Converter.ToType<LoginDetail>(ds.Tables[0]);
                     loginResponse.Menu = ds.Tables[1];
+                    if(loginResponse.Menu.Rows.Count == 0)
+                    {
+                        throw HiringBellException.ThrowBadRequest("Menu not found for the current user.");
+                    }
+
                     loginResponse.Department = ds.Tables[3];
                     loginResponse.Roles = ds.Tables[4];
                     loginResponse.UserTypeId = authUser.UserTypeId;
