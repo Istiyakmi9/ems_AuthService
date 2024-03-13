@@ -4,6 +4,8 @@ namespace ems_AuthServiceLayer.Contracts
 {
     public interface ILoginService
     {
+        Task<string> EncryptDetailService(string text);
+        Task<string> DecryptDetailService(string text);
         Task<Tuple<string, string>> GenerateNewRegistrationPassword();
         Task<LoginResponse> AuthenticateUser(UserDetail authUser);
         Task<LoginResponse> FetchAuthenticatedProviderDetail(UserDetail authUser);

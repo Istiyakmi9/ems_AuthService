@@ -399,6 +399,18 @@ namespace ems_AuthServiceLayer.Service
             return new Tuple<string, string>(newPassword, encryptedPassword);
         }
 
+        public async Task<string> EncryptDetailService(string text)
+        {
+            string data = UtilService.Encrypt(text, _configuration.GetSection("EncryptSecret").Value);
+            return await Task.FromResult(data);
+        }
+        
+        public async Task<string> DecryptDetailService(string text)
+        {
+            var data = UtilService.Decrypt(text, _configuration.GetSection("EncryptSecret").Value);
+            return await Task.FromResult(data);
+        }
+
         public async Task<string> GenerateRandomPassword(int length)
         {
             const string upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
