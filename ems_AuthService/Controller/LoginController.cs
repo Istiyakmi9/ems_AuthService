@@ -55,7 +55,7 @@ namespace ems_AuthService.Controller
             return BuildResponse(userDetail, HttpStatusCode.OK);
         }
 
-        [HttpPost]
+        [HttpGet]
         [AllowAnonymous]
         [Route("GenerateTempraryPassword")]
         public async Task<ApiResponse> GenerateTempraryPassword()
