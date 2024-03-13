@@ -345,7 +345,7 @@ namespace ems_AuthServiceLayer.Service
                 if (string.IsNullOrEmpty(encryptedPassword))
                     throw new HiringBellException("Email id is not registered. Please contact to admin");
 
-                string newPassword = GenerateRandomPassword(10);
+                string newPassword = await GenerateRandomPassword(10);
                 var enNewPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
 
                 var result = db.Execute<string>("sp_Reset_Password", new
@@ -392,7 +392,7 @@ namespace ems_AuthServiceLayer.Service
                 throw new HiringBellException("The email is invalid");
         }
 
-        public string GenerateRandomPassword(int length)
+        public async Task<string> GenerateRandomPassword(int length)
         {
             const string upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             const string lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
@@ -430,7 +430,7 @@ namespace ems_AuthServiceLayer.Service
                 combinedChars = randomStartChar + combinedChars.Substring(1);
             }
 
-            return combinedChars;
+            return await Task.FromResult(combinedChars);
         }
     }
 }

@@ -56,6 +56,15 @@ namespace ems_AuthService.Controller
         }
 
         [HttpPost]
+        [AllowAnonymous]
+        [Route("GenerateTempraryPassword")]
+        public async Task<ApiResponse> GenerateTempraryPassword()
+        {
+            var userDetail = await this.loginService.GenerateRandomPassword(10);
+            return BuildResponse(userDetail, HttpStatusCode.OK);
+        }
+
+        [HttpPost]
         [Route("GetUserDetail")]
         public IResponse<ApiResponse> GetUserDetail(AuthUser authUser)
         {
