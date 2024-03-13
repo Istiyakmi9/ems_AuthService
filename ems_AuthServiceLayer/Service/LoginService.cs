@@ -82,7 +82,7 @@ namespace ems_AuthServiceLayer.Service
 
         private void ValidePasswordStatus(LoginDetail loginDetail)
         {
-            if(loginDetail.UserTypeId == 101)
+            if (loginDetail.UserTypeId == 101)
             {
                 var applicationSettings = db.Get<ApplicationSettings>("sp_application_setting_get_by_compid", new
                 {
@@ -95,7 +95,7 @@ namespace ems_AuthServiceLayer.Service
 
                 var passwordSettings = JsonConvert.DeserializeObject<PasswordSettings>(applicationSettings.SettingDetails);
 
-                if(DateTime.UtcNow.Subtract(loginDetail.UpdatedOn).TotalSeconds > passwordSettings.TemporaryPasswordExpiryTimeInSeconds)
+                if (DateTime.UtcNow.Subtract(loginDetail.UpdatedOn).TotalSeconds > passwordSettings.TemporaryPasswordExpiryTimeInSeconds)
                     throw HiringBellException.ThrowBadRequest("Your temporary password got expired. Please reset again.");
             }
         }
@@ -184,7 +184,7 @@ namespace ems_AuthServiceLayer.Service
                     loginResponse = new LoginResponse();
                     var loginDetail = Converter.ToType<LoginDetail>(ds.Tables[0]);
                     loginResponse.Menu = ds.Tables[1];
-                    if(loginResponse.Menu.Rows.Count == 0)
+                    if (loginResponse.Menu.Rows.Count == 0)
                     {
                         throw HiringBellException.ThrowBadRequest("Menu not found for the current user.");
                     }
@@ -390,6 +390,13 @@ namespace ems_AuthServiceLayer.Service
             bool isValidEmail = mail.Host.Contains(".");
             if (!isValidEmail)
                 throw new HiringBellException("The email is invalid");
+        }
+
+        public async Task<Tuple<string, string>> GenerateNewRegistrationPassword()
+        {
+            string newPassword = await GenerateRandomPassword(10);
+            string encryptedPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
+            return new Tuple<string, string>(newPassword, encryptedPassword);
         }
 
         public async Task<string> GenerateRandomPassword(int length)

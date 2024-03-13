@@ -4,7 +4,7 @@ namespace ems_AuthServiceLayer.Contracts
 {
     public interface ILoginService
     {
-        Task<string> GenerateRandomPassword(int passwordLength);
+        Task<Tuple<string, string>> GenerateNewRegistrationPassword();
         Task<LoginResponse> AuthenticateUser(UserDetail authUser);
         Task<LoginResponse> FetchAuthenticatedProviderDetail(UserDetail authUser);
         Task<bool> RegisterNewCompany(RegistrationForm registrationForm);

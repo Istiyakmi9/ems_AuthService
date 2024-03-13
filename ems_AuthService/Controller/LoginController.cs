@@ -60,8 +60,8 @@ namespace ems_AuthService.Controller
         [Route("GenerateTempraryPassword")]
         public async Task<ApiResponse> GenerateTempraryPassword()
         {
-            var userDetail = await this.loginService.GenerateRandomPassword(10);
-            return BuildResponse(userDetail, HttpStatusCode.OK);
+            var userDetail = await this.loginService.GenerateNewRegistrationPassword();
+            return BuildResponse(userDetail.Item1, HttpStatusCode.OK, string.Empty, userDetail.Item2);
         }
 
         [HttpPost]
