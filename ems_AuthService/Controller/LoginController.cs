@@ -55,6 +55,33 @@ namespace ems_AuthService.Controller
             return BuildResponse(userDetail, HttpStatusCode.OK);
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("GenerateTempraryPassword")]
+        public async Task<ApiResponse> GenerateTempraryPassword()
+        {
+            var userDetail = await this.loginService.GenerateNewRegistrationPassword();
+            return BuildResponse(userDetail.Item1, HttpStatusCode.OK, string.Empty, userDetail.Item2);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("DecryptDetail/{text}")]
+        public async Task<ApiResponse> DecryptDetail(string text)
+        {
+            var result = await this.loginService.DecryptDetailService(text);
+            return BuildResponse(result, HttpStatusCode.OK);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("EncryptDetail/{text}")]
+        public async Task<ApiResponse> EncryptDetail(string text)
+        {
+            var result = await this.loginService.EncryptDetailService(text);
+            return BuildResponse(result, HttpStatusCode.OK);
+        }
+
         [HttpPost]
         [Route("GetUserDetail")]
         public IResponse<ApiResponse> GetUserDetail(AuthUser authUser)
