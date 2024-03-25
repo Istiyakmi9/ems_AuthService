@@ -9,9 +9,11 @@ using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using ModalLayer;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net.Mail;
+using System.Reflection.Metadata.Ecma335;
 
 namespace ems_AuthServiceLayer.Service
 {
@@ -128,7 +130,7 @@ namespace ems_AuthServiceLayer.Service
 
             return encryptedPassword;
         }
-        public async Task<LoginResponse> FetchAuthenticatedProviderDetail(UserDetail authUser)
+        public async Task<AuthResponse> FetchAuthenticatedProviderDetail(UserDetail authUser)
         {
             string ProcedureName = string.Empty;
             if (authUser.UserTypeId == (int)UserType.Admin)
@@ -138,7 +140,7 @@ namespace ems_AuthServiceLayer.Service
             else
                 throw new HiringBellException("UserType is invalid. Only system user allowed");
 
-            LoginResponse loginResponse = default;
+            AuthResponse loginResponse = default;
             if ((!string.IsNullOrEmpty(authUser.EmailId) || !string.IsNullOrEmpty(authUser.Mobile)) && !string.IsNullOrEmpty(authUser.Password))
             {
                 loginResponse = await FetchUserDetail(authUser, ProcedureName);
@@ -147,9 +149,9 @@ namespace ems_AuthServiceLayer.Service
             return loginResponse;
         }
 
-        public async Task<LoginResponse> AuthenticateUser(UserDetail authUser)
+        public async Task<AuthResponse> AuthenticateUser(UserDetail authUser)
         {
-            LoginResponse loginResponse = default;
+            AuthResponse loginResponse = default;
             if ((!string.IsNullOrEmpty(authUser.EmailId) || !string.IsNullOrEmpty(authUser.Mobile)) && !string.IsNullOrEmpty(authUser.Password))
             {
                 var encryptedPassword = this.GetUserLoginDetail(authUser);
@@ -160,14 +162,35 @@ namespace ems_AuthServiceLayer.Service
                 }
 
                 loginResponse = await FetchUserDetail(authUser, "sp_Employeelogin_Auth");
+
+                if (await CheckOrganizationSetup())
+                {
+                    loginResponse.SetupStatus = true;
+                }
+                else
+                {
+                    loginResponse.SetupStatus = false;
+                }
+
             }
 
             return await Task.FromResult(loginResponse);
         }
 
-        private async Task<LoginResponse> FetchUserDetail(UserDetail authUser, string ProcedureName)
+        private async Task<bool> CheckOrganizationSetup()
         {
-            LoginResponse loginResponse = default;
+            DbResult result = db.Execute("sp_org_setup_isready", new { _currentSession.CurrentUserDetail.CompanyId }, true);
+            if (result.statusMessage == "2")
+            {
+                return await Task.FromResult(true);
+            }
+
+            return await Task.FromResult(false);
+        }
+
+        private async Task<AuthResponse> FetchUserDetail(UserDetail authUser, string ProcedureName)
+        {
+            AuthResponse loginResponse = default;
             DataSet ds = await db.GetDataSetAsync(ProcedureName, new
             {
                 authUser.UserId,
@@ -181,7 +204,7 @@ namespace ems_AuthServiceLayer.Service
             {
                 if (ds.Tables[0].Rows.Count > 0)
                 {
-                    loginResponse = new LoginResponse();
+                    loginResponse = new AuthResponse();
                     var loginDetail = Converter.ToType<LoginDetail>(ds.Tables[0]);
                     loginResponse.Menu = ds.Tables[1];
                     if (loginResponse.Menu.Rows.Count == 0)
@@ -404,7 +427,7 @@ namespace ems_AuthServiceLayer.Service
             string data = UtilService.Encrypt(text, _configuration.GetSection("EncryptSecret").Value);
             return await Task.FromResult(data);
         }
-        
+
         public async Task<string> DecryptDetailService(string text)
         {
             var data = UtilService.Decrypt(text, _configuration.GetSection("EncryptSecret").Value);
