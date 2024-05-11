@@ -9,9 +9,11 @@ using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using ModalLayer;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net.Mail;
+using System.Reflection.Metadata.Ecma335;
 
 namespace ems_AuthServiceLayer.Service
 {
@@ -82,7 +84,7 @@ namespace ems_AuthServiceLayer.Service
 
         private void ValidePasswordStatus(LoginDetail loginDetail)
         {
-            if(loginDetail.UserTypeId == 101)
+            if (loginDetail.UserTypeId == 101)
             {
                 var applicationSettings = db.Get<ApplicationSettings>("sp_application_setting_get_by_compid", new
                 {
@@ -95,7 +97,7 @@ namespace ems_AuthServiceLayer.Service
 
                 var passwordSettings = JsonConvert.DeserializeObject<PasswordSettings>(applicationSettings.SettingDetails);
 
-                if(DateTime.UtcNow.Subtract(loginDetail.UpdatedOn).TotalSeconds > passwordSettings.TemporaryPasswordExpiryTimeInSeconds)
+                if (DateTime.UtcNow.Subtract(loginDetail.UpdatedOn).TotalSeconds > passwordSettings.TemporaryPasswordExpiryTimeInSeconds)
                     throw HiringBellException.ThrowBadRequest("Your temporary password got expired. Please reset again.");
             }
         }
@@ -128,7 +130,7 @@ namespace ems_AuthServiceLayer.Service
 
             return encryptedPassword;
         }
-        public async Task<LoginResponse> FetchAuthenticatedProviderDetail(UserDetail authUser)
+        public async Task<AuthResponse> FetchAuthenticatedProviderDetail(UserDetail authUser)
         {
             string ProcedureName = string.Empty;
             if (authUser.UserTypeId == (int)UserType.Admin)
@@ -138,7 +140,7 @@ namespace ems_AuthServiceLayer.Service
             else
                 throw new HiringBellException("UserType is invalid. Only system user allowed");
 
-            LoginResponse loginResponse = default;
+            AuthResponse loginResponse = default;
             if ((!string.IsNullOrEmpty(authUser.EmailId) || !string.IsNullOrEmpty(authUser.Mobile)) && !string.IsNullOrEmpty(authUser.Password))
             {
                 loginResponse = await FetchUserDetail(authUser, ProcedureName);
@@ -147,9 +149,9 @@ namespace ems_AuthServiceLayer.Service
             return loginResponse;
         }
 
-        public async Task<LoginResponse> AuthenticateUser(UserDetail authUser)
+        public async Task<AuthResponse> AuthenticateUser(UserDetail authUser)
         {
-            LoginResponse loginResponse = default;
+            AuthResponse loginResponse = default;
             if ((!string.IsNullOrEmpty(authUser.EmailId) || !string.IsNullOrEmpty(authUser.Mobile)) && !string.IsNullOrEmpty(authUser.Password))
             {
                 var encryptedPassword = this.GetUserLoginDetail(authUser);
@@ -160,14 +162,35 @@ namespace ems_AuthServiceLayer.Service
                 }
 
                 loginResponse = await FetchUserDetail(authUser, "sp_Employeelogin_Auth");
+
+                if (await CheckOrganizationSetup())
+                {
+                    loginResponse.SetupStatus = true;
+                }
+                else
+                {
+                    loginResponse.SetupStatus = false;
+                }
+
             }
 
             return await Task.FromResult(loginResponse);
         }
 
-        private async Task<LoginResponse> FetchUserDetail(UserDetail authUser, string ProcedureName)
+        private async Task<bool> CheckOrganizationSetup()
         {
-            LoginResponse loginResponse = default;
+            DbResult result = db.Execute("sp_org_setup_isready", new { _currentSession.CurrentUserDetail.CompanyId }, true);
+            if (result.statusMessage == "2")
+            {
+                return await Task.FromResult(true);
+            }
+
+            return await Task.FromResult(false);
+        }
+
+        private async Task<AuthResponse> FetchUserDetail(UserDetail authUser, string ProcedureName)
+        {
+            AuthResponse loginResponse = default;
             DataSet ds = await db.GetDataSetAsync(ProcedureName, new
             {
                 authUser.UserId,
@@ -181,10 +204,10 @@ namespace ems_AuthServiceLayer.Service
             {
                 if (ds.Tables[0].Rows.Count > 0)
                 {
-                    loginResponse = new LoginResponse();
+                    loginResponse = new AuthResponse();
                     var loginDetail = Converter.ToType<LoginDetail>(ds.Tables[0]);
                     loginResponse.Menu = ds.Tables[1];
-                    if(loginResponse.Menu.Rows.Count == 0)
+                    if (loginResponse.Menu.Rows.Count == 0)
                     {
                         throw HiringBellException.ThrowBadRequest("Menu not found for the current user.");
                     }
@@ -345,7 +368,7 @@ namespace ems_AuthServiceLayer.Service
                 if (string.IsNullOrEmpty(encryptedPassword))
                     throw new HiringBellException("Email id is not registered. Please contact to admin");
 
-                string newPassword = GenerateRandomPassword(10);
+                string newPassword = await GenerateRandomPassword(10);
                 var enNewPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
 
                 var result = db.Execute<string>("sp_Reset_Password", new
@@ -392,7 +415,26 @@ namespace ems_AuthServiceLayer.Service
                 throw new HiringBellException("The email is invalid");
         }
 
-        public string GenerateRandomPassword(int length)
+        public async Task<Tuple<string, string>> GenerateNewRegistrationPassword()
+        {
+            string newPassword = await GenerateRandomPassword(10);
+            string encryptedPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
+            return new Tuple<string, string>(newPassword, encryptedPassword);
+        }
+
+        public async Task<string> EncryptDetailService(string text)
+        {
+            string data = UtilService.Encrypt(text, _configuration.GetSection("EncryptSecret").Value);
+            return await Task.FromResult(data);
+        }
+
+        public async Task<string> DecryptDetailService(string text)
+        {
+            var data = UtilService.Decrypt(text, _configuration.GetSection("EncryptSecret").Value);
+            return await Task.FromResult(data);
+        }
+
+        public async Task<string> GenerateRandomPassword(int length)
         {
             const string upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             const string lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
@@ -430,7 +472,7 @@ namespace ems_AuthServiceLayer.Service
                 combinedChars = randomStartChar + combinedChars.Substring(1);
             }
 
-            return combinedChars;
+            return await Task.FromResult(combinedChars);
         }
     }
 }

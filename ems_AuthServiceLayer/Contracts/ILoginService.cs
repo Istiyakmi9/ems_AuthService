@@ -1,11 +1,15 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
+using ems_AuthServiceLayer.Models;
 
 namespace ems_AuthServiceLayer.Contracts
 {
     public interface ILoginService
     {
-        Task<LoginResponse> AuthenticateUser(UserDetail authUser);
-        Task<LoginResponse> FetchAuthenticatedProviderDetail(UserDetail authUser);
+        Task<string> EncryptDetailService(string text);
+        Task<string> DecryptDetailService(string text);
+        Task<Tuple<string, string>> GenerateNewRegistrationPassword();
+        Task<AuthResponse> AuthenticateUser(UserDetail authUser);
+        Task<AuthResponse> FetchAuthenticatedProviderDetail(UserDetail authUser);
         Task<bool> RegisterNewCompany(RegistrationForm registrationForm);
         Boolean RemoveUserDetailService(string Token);
         UserDetail GetUserDetail(AuthUser authUser);
