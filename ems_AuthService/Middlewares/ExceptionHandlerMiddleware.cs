@@ -7,6 +7,7 @@ using ems_AuthServiceLayer.Models;
 using ems_AuthServiceLayer.Service;
 using Newtonsoft.Json;
 using System.Net;
+using Bot.CoreBottomHalf.CommonModal.Kafka;
 
 namespace ems_AuthService.Middlewares
 {
@@ -125,7 +126,7 @@ namespace ems_AuthService.Middlewares
 
         private async Task SendExceptionEmailService(string message, CurrentSession currentSession, KafkaNotificationService kafkaNotificationService)
         {
-            CommonFields commonFields = new CommonFields
+            KafkaPayload commonFields = new KafkaPayload
             {
                 Body = message,
                 LocalConnectionString = currentSession.LocalConnectionString,
