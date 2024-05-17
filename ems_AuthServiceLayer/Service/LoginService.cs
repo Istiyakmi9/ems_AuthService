@@ -260,7 +260,8 @@ namespace ems_AuthServiceLayer.Service
                             CreatedOn = loginDetail.CreatedOn,
                             WorkShiftId = loginDetail.WorkShiftId,
                             RoleId = loginDetail.RoleId,
-                            CompanyCode = authUser.CompanyCode
+                            CompanyCode = authUser.CompanyCode,
+                            FinancialYear = currentCompany.FinancialYear
                         };
 
                         loginResponse.UserDetail = userDetail;

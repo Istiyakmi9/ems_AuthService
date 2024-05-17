@@ -1,5 +1,4 @@
-﻿using Bot.CoreBottomHalf.CommonModal;
-using Bot.CoreBottomHalf.CommonModal.Enums;
+﻿using Bot.CoreBottomHalf.CommonModal.Enums;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,17 +31,17 @@ namespace ems_AuthServiceLayer.Service
             {
                 var result = JsonConvert.SerializeObject(attendanceRequestModal);
 
-                _logger.LogInformation($"[Kafka] Starting kafka service to send mesage. Topic used: {_kafkaServiceConfig.AttendanceEmailTopic}, Service: {_kafkaServiceConfig.ServiceName}");
+                _logger.LogInformation($"[Kafka] Starting kafka service to send message. Topic used: {_kafkaServiceConfig.Topic}, Service: {_kafkaServiceConfig.ServiceName}");
                 using (var producer = new ProducerBuilder<Null, string>(_producerConfig).Build())
                 {
-                    _logger.LogInformation($"[Kafka] Sending mesage: {result}");
-                    await producer.ProduceAsync(_kafkaServiceConfig.AttendanceEmailTopic, new Message<Null, string>
+                    _logger.LogInformation($"[Kafka] Sending message: {result}");
+                    await producer.ProduceAsync(_kafkaServiceConfig.Topic, new Message<Null, string>
                     {
                         Value = result
                     });
 
                     producer.Flush(TimeSpan.FromSeconds(10));
-                    _logger.LogInformation($"[Kafka] Messge send successfully");
+                    _logger.LogInformation($"[Kafka] Message send successfully");
                 }
             }
 
