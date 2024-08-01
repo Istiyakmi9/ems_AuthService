@@ -15,5 +15,6 @@ namespace ems_AuthServiceLayer.Contracts
         UserDetail GetUserDetail(AuthUser authUser);
         string ResetEmployeePassword(UserDetail authUser);
         Task<string> ForgotPasswordService(string email);
+        Task<string> GenerateTokenService(string companyCode);
     }
 }

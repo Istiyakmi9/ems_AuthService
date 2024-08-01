@@ -475,5 +475,21 @@ namespace ems_AuthServiceLayer.Service
 
             return await Task.FromResult(combinedChars);
         }
+
+        public async Task<string> GenerateTokenService(string companyCode)
+        {
+            if (string.IsNullOrEmpty(companyCode))
+                throw new Exception("Invalid company code");
+
+            UserDetail userDetail = new UserDetail
+            {
+                RoleId = 1,
+                CompanyCode = companyCode,
+                EmailId = ""
+            };
+
+            var refreshTokenModal = _authenticationService.Authenticate(userDetail);
+            return await Task.FromResult(refreshTokenModal.Token);
+        }
     }
 }
