@@ -75,7 +75,7 @@ namespace ems_AuthServiceLayer.Service
             string generatedToken = GenerateAccessToken(userDetail, role);
             var refreshToken = GenerateRefreshToken(null);
             refreshToken.Token = generatedToken;
-            SaveRefreshToken(refreshToken, userDetail.UserId);
+            // SaveRefreshToken(refreshToken, userDetail.UserId);
             return refreshToken;
         }
 

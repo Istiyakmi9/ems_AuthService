@@ -104,5 +104,13 @@ namespace ems_AuthService.Controller
             var result = await this.loginService.ForgotPasswordService(user.EmailId);
             return BuildResponse(result, HttpStatusCode.OK);
         }
+
+        [AllowAnonymous]
+        [HttpGet("GenerateToken/{companyCode}")]
+        public async Task<ApiResponse> GenerateToken([FromRoute] string companyCode)
+        {
+            var userDetail = await loginService.GenerateTokenService(companyCode);
+            return BuildResponse(userDetail, HttpStatusCode.OK);
+        }
     }
 }
