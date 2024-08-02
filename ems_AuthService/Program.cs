@@ -33,7 +33,10 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddSingleton<IDb, Db>();
-builder.Services.AddSingleton<ITimezoneConverter, TimezoneConverter>();
+builder.Services.AddSingleton<ITimezoneConverter, TimezoneConverter>(x =>
+{
+    return TimezoneConverter.Instance;
+});
 builder.Services.AddSingleton<ApplicationConfiguration>();
 
 var kafkaServerDetail = new ProducerConfig();

@@ -1,13 +1,12 @@
-﻿using Bot.CoreBottomHalf.CommonModal.API;
+﻿using Bot.CoreBottomHalf.CommonModal;
+using Bot.CoreBottomHalf.CommonModal.API;
 using Bot.CoreBottomHalf.CommonModal.Enums;
 using Bot.CoreBottomHalf.CommonModal.HtmlTemplateModel;
-using Bot.CoreBottomHalf.CommonModal;
-using CoreBottomHalf.CommonModal.HtmlTemplateModel;
+using Bot.CoreBottomHalf.CommonModal.Kafka;
 using ems_AuthServiceLayer.Models;
 using ems_AuthServiceLayer.Service;
 using Newtonsoft.Json;
 using System.Net;
-using Bot.CoreBottomHalf.CommonModal.Kafka;
 
 namespace ems_AuthService.Middlewares
 {

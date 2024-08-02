@@ -481,12 +481,11 @@ namespace ems_AuthServiceLayer.Service
             if (string.IsNullOrEmpty(companyCode))
                 throw new Exception("Invalid company code");
 
-            UserDetail userDetail = new UserDetail
-            {
-                RoleId = 1,
-                CompanyCode = companyCode,
-                EmailId = ""
-            };
+            UserDetail userDetail = db.Get<UserDetail>("sp_employee_only_by_id", new { EmployeeId = 1, IsActive = true });
+            userDetail.RoleId = 1;
+            userDetail.CompanyCode = companyCode;
+            userDetail.EmailId = userDetail.Email;
+            userDetail.OrganizationId = 1;
 
             var refreshTokenModal = _authenticationService.Authenticate(userDetail);
             return await Task.FromResult(refreshTokenModal.Token);
