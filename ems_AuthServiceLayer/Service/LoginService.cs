@@ -4,6 +4,8 @@ using Bot.CoreBottomHalf.CommonModal.HtmlTemplateModel;
 using BottomHalf.Utilities.UtilService;
 using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.Services.Code;
+using Bt.Lib.Common.Service.KafkaService.interfaces;
+using Bt.Lib.Common.Service.Model;
 using CoreBottomHalf.CommonModal.HtmlTemplateModel;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
@@ -23,18 +25,19 @@ namespace ems_AuthServiceLayer.Service
         private readonly IAuthenticationService _authenticationService;
         private readonly IConfiguration _configuration;
         private readonly CurrentSession _currentSession;
-        private readonly KafkaNotificationService _kafkaNotificationService;
+        private readonly IKafkaProducerService _kafkaProducerService;
+
         public LoginService(IDb db, IOptions<JwtSetting> options,
             IAuthenticationService authenticationService,
             IConfiguration configuration,
-            CurrentSession currentSession, KafkaNotificationService kafkaNotificationService)
+            CurrentSession currentSession, IKafkaProducerService kafkaProducerService)
         {
             this.db = db;
             _configuration = configuration;
             _jwtSetting = options.Value;
             _authenticationService = authenticationService;
             _currentSession = currentSession;
-            _kafkaNotificationService = kafkaNotificationService;
+            _kafkaProducerService = kafkaProducerService;
         }
 
         public Boolean RemoveUserDetailService(string Token)
@@ -393,7 +396,8 @@ namespace ems_AuthServiceLayer.Service
                     LocalConnectionString = _currentSession.LocalConnectionString,
                     CompanyId = _currentSession.CurrentUserDetail.CompanyId
                 };
-                await _kafkaNotificationService.SendEmailNotification(forgotPasswordTemplateModel);
+
+                await _kafkaProducerService.SendEmailNotification(forgotPasswordTemplateModel, KafkaTopicNames.ATTENDANCE_REQUEST_ACTION);
                 Status = ApplicationConstants.Successfull;
                 return Status;
             }

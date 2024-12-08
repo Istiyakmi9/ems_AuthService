@@ -4,13 +4,14 @@ using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.DatabaseLayer.MySql.Code;
 using BottomhalfCore.Services.Code;
 using BottomhalfCore.Services.Interface;
-using Bt.Lib.Common.Service.Configserver;
+using Bt.Lib.Common.Service.KafkaService.code.Producer;
+using Bt.Lib.Common.Service.KafkaService.interfaces;
+using Bt.Lib.Common.Service.Middlewares;
+using Bt.Lib.Common.Service.Model;
 using Confluent.Kafka;
-using ems_AuthService.Middlewares;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ModalLayer;
 using Newtonsoft.Json.Serialization;
@@ -43,18 +44,6 @@ builder.Services.Configure<KafkaServiceConfig>(x => builder.Configuration.GetSec
 builder.Services.Configure<JwtSetting>(o => builder.Configuration.GetSection(nameof(JwtSetting)).Bind(o));
 
 builder.Services.AddSingleton<ProducerConfig>(kafkaServerDetail);
-builder.Services.AddSingleton<KafkaNotificationService>(x =>
-{
-    return new KafkaNotificationService(
-        x.GetRequiredService<IOptions<KafkaServiceConfig>>(),
-        x.GetRequiredService<ProducerConfig>(),
-        x.GetRequiredService<ILogger<KafkaNotificationService>>(),
-        builder.Environment.EnvironmentName == nameof(DefinedEnvironments.Development) ?
-                        DefinedEnvironments.Development :
-                        DefinedEnvironments.Production
-    );
-});
-
 builder.Services.AddScoped<CurrentSession>(x =>
 {
     return new CurrentSession
@@ -64,6 +53,13 @@ builder.Services.AddScoped<CurrentSession>(x =>
                         DefinedEnvironments.Production
     };
 });
+
+builder.Services.AddSingleton<IKafkaProducerService>(x =>
+    KafkaProducerService.SubscribeKafkaService(
+        ApplicationNames.EMSTUM,
+        x.GetRequiredService<ProducerConfig>()
+    )
+);
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
@@ -102,10 +98,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddSingleton<IFetchGithubConfigurationService>(x =>
-    FetchGithubConfigurationService.getInstance(Bt.Lib.Common.Service.Model.GitRepositories.EMS_CONFIG_SERVICE).GetAwaiter().GetResult()
-);
 
+// builder.Services.AddHostedService<KafkaService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
