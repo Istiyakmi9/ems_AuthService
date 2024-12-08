@@ -13,7 +13,6 @@ using ModalLayer;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net.Mail;
-using System.Reflection.Metadata.Ecma335;
 
 namespace ems_AuthServiceLayer.Service
 {
@@ -25,7 +24,6 @@ namespace ems_AuthServiceLayer.Service
         private readonly IConfiguration _configuration;
         private readonly CurrentSession _currentSession;
         private readonly KafkaNotificationService _kafkaNotificationService;
-
         public LoginService(IDb db, IOptions<JwtSetting> options,
             IAuthenticationService authenticationService,
             IConfiguration configuration,

@@ -4,14 +4,12 @@ using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.DatabaseLayer.MySql.Code;
 using BottomhalfCore.Services.Code;
 using BottomhalfCore.Services.Interface;
+using Bt.Lib.Common.Service.Configserver;
 using Confluent.Kafka;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using ems_AuthService.Middlewares;
 using ems_AuthServiceLayer.Contracts;
-using ems_AuthServiceLayer.Models;
 using ems_AuthServiceLayer.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ModalLayer;
@@ -103,6 +101,10 @@ builder.Services.AddCors(options =>
         .WithExposedHeaders("Authorization");
     });
 });
+
+builder.Services.AddSingleton<IFetchGithubConfigurationService>(x =>
+    FetchGithubConfigurationService.getInstance(Bt.Lib.Common.Service.Model.GitRepositories.EMS_CONFIG_SERVICE).GetAwaiter().GetResult()
+);
 
 var app = builder.Build();
 
