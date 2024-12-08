@@ -4,7 +4,7 @@ using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.DatabaseLayer.MySql.Code;
 using BottomhalfCore.Services.Code;
 using BottomhalfCore.Services.Interface;
-using bt_lib_common_services.Configserver;
+using Bt.Lib.Common.Service.Configserver;
 using Confluent.Kafka;
 using ems_AuthService.Middlewares;
 using ems_AuthServiceLayer.Contracts;
@@ -103,7 +103,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddSingleton<IFetchGithubConfigurationService>(x =>
-    FetchGithubConfigurationService.getInstance(bt_lib_common_services.Model.GitRepositories.EMS_CONFIG_SERVICE).GetAwaiter().GetResult()
+    FetchGithubConfigurationService.getInstance(Bt.Lib.Common.Service.Model.GitRepositories.EMS_CONFIG_SERVICE).GetAwaiter().GetResult()
 );
 
 var app = builder.Build();
