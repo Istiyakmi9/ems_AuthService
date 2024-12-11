@@ -57,7 +57,8 @@ builder.Services.AddScoped<CurrentSession>(x =>
 builder.Services.AddSingleton<IKafkaProducerService>(x =>
     KafkaProducerService.SubscribeKafkaService(
         ApplicationNames.EMSTUM,
-        x.GetRequiredService<ProducerConfig>()
+        x.GetRequiredService<ProducerConfig>(),
+        builder.Environment
     )
 );
 
