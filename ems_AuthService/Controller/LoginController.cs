@@ -51,8 +51,15 @@ namespace ems_AuthService.Controller
         [Route("Authenticate")]
         public async Task<ApiResponse> Authenticate(UserDetail authUser)
         {
-            var userDetail = await this.loginService.AuthenticateUser(authUser);
-            return BuildResponse(userDetail, HttpStatusCode.OK);
+            try
+            {
+                var userDetail = await this.loginService.AuthenticateUser(authUser);
+                return BuildResponse(userDetail, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                throw Throw(ex, authUser);
+            }
         }
 
         [HttpGet]
@@ -93,16 +100,30 @@ namespace ems_AuthService.Controller
         [HttpPost("ResetEmployeePassword")]
         public IResponse<ApiResponse> ResetEmployeePassword(UserDetail authUser)
         {
-            var result = this.loginService.ResetEmployeePassword(authUser);
-            return BuildResponse(result, HttpStatusCode.OK);
+            try
+            {
+                var result = this.loginService.ResetEmployeePassword(authUser);
+                return BuildResponse(result, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                throw Throw(ex, authUser);
+            }
         }
 
         [HttpPost("ForgotPassword")]
         [AllowAnonymous]
         public async Task<ApiResponse> ForgotPassword([FromBody] UserDetail user)
         {
-            var result = await this.loginService.ForgotPasswordService(user.EmailId);
-            return BuildResponse(result, HttpStatusCode.OK);
+            try
+            {
+                var result = await this.loginService.ForgotPasswordService(user.EmailId);
+                return BuildResponse(result, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                throw Throw(ex, user);
+            }
         }
 
         [AllowAnonymous]

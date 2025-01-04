@@ -12,6 +12,7 @@ using ems_AuthServiceLayer.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using ModalLayer;
+using ModalLayer.Modal;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net.Mail;
@@ -71,7 +72,7 @@ namespace ems_AuthServiceLayer.Service
             });
 
             if (loginDetail == null)
-                throw new HiringBellException("Please enter a valid email address or mobile number.");
+                throw HiringBellException.ThrowBadRequest("Please enter a valid email address or mobile number.");
 
             encryptedPassword = loginDetail.Password;
             authUser.OrganizationId = loginDetail.OrganizationId;
@@ -159,7 +160,7 @@ namespace ems_AuthServiceLayer.Service
                 encryptedPassword = UtilService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
                 if (encryptedPassword.CompareTo(authUser.Password) != 0)
                 {
-                    throw new HiringBellException("Invalid userId or password.");
+                    throw  HiringBellException.ThrowBadRequest("Invalid userId or password.");
                 }
 
                 loginResponse = await FetchUserDetail(authUser, "sp_Employeelogin_Auth");
