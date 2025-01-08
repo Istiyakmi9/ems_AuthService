@@ -27,11 +27,12 @@ namespace ems_AuthServiceLayer.Service
         private readonly IConfiguration _configuration;
         private readonly CurrentSession _currentSession;
         private readonly IKafkaProducerService _kafkaProducerService;
+        private readonly PublicKeyDetail _publicKeyDetail;
 
         public LoginService(IDb db, IOptions<JwtSetting> options,
             IAuthenticationService authenticationService,
             IConfiguration configuration,
-            CurrentSession currentSession, IKafkaProducerService kafkaProducerService)
+            CurrentSession currentSession, IKafkaProducerService kafkaProducerService, PublicKeyDetail publicKeyDetail)
         {
             this.db = db;
             _configuration = configuration;
@@ -39,6 +40,7 @@ namespace ems_AuthServiceLayer.Service
             _authenticationService = authenticationService;
             _currentSession = currentSession;
             _kafkaProducerService = kafkaProducerService;
+            _publicKeyDetail = publicKeyDetail;
         }
 
         public Boolean RemoveUserDetailService(string Token)
@@ -271,7 +273,7 @@ namespace ems_AuthServiceLayer.Service
                         if (_token != null)
                         {
                             userDetail.Token = _token.Token;
-                            userDetail.TokenExpiryDuration = DateTime.Now.AddHours(_jwtSetting.AccessTokenExpiryTimeInSeconds);
+                            userDetail.TokenExpiryDuration = DateTime.UtcNow.AddSeconds(_publicKeyDetail.DefaulExpiryTimeInSeconds * 12);
                             userDetail.RefreshToken = _token.RefreshToken;
                         }
                     }

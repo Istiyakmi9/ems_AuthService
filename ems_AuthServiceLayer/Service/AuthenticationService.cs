@@ -1,8 +1,9 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
 using BottomhalfCore.DatabaseLayer.Common.Code;
+using Bt.Lib.Common.Service.Model;
+using Bt.Lib.Common.Service.Services;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,14 +15,22 @@ namespace ems_AuthServiceLayer.Service
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly JwtSetting _jwtSetting;
         private readonly IDb _db;
         private readonly CurrentSession _currentSession;
-        public AuthenticationService(IOptions<JwtSetting> options, IDb db, CurrentSession currentSession)
+        private readonly GitHubConnector _gitHubConnector;
+        private readonly MicroserviceRegistry _microserviceRegistry;
+        private readonly PublicKeyDetail _publicKeyDetail;
+        public AuthenticationService(IDb db,
+            CurrentSession currentSession,
+            GitHubConnector gitHubConnector,
+            MicroserviceRegistry microserviceRegistry,
+            PublicKeyDetail publicKeyDetail)
         {
-            _jwtSetting = options.Value;
             _db = db;
             _currentSession = currentSession;
+            _gitHubConnector = gitHubConnector;
+            _microserviceRegistry = microserviceRegistry;
+            _publicKeyDetail = publicKeyDetail;
         }
 
         struct UserClaims
@@ -44,9 +53,9 @@ namespace ems_AuthServiceLayer.Service
                         ValidateAudience = false,
                         ValidateLifetime = false,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = _jwtSetting.Issuer, //_configuration["jwtSetting:Issuer"],
-                        ValidAudience = _jwtSetting.Issuer, //_configuration["jwtSetting:Issuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key))
+                        ValidIssuer = _publicKeyDetail.Issuer, //_configuration["jwtSetting:Issuer"],
+                        ValidAudience = _publicKeyDetail.Issuer, //_configuration["jwtSetting:Issuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_publicKeyDetail.Key))
                     }, out SecurityToken validatedToken);
 
                     var securityToken = handler.ReadToken(token) as JwtSecurityToken;
@@ -88,7 +97,7 @@ namespace ems_AuthServiceLayer.Service
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new System.Security.Claims.ClaimsIdentity(new Claim[] {
+                Subject = new ClaimsIdentity(new Claim[] {
                     new Claim(JwtRegisteredClaimNames.Sid, userDetail.UserId.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, userDetail.EmailId),
                     new Claim(ClaimTypes.Role, role),
@@ -100,10 +109,10 @@ namespace ems_AuthServiceLayer.Service
                 }),
 
                 //----------- Expiry time at after what time token will get expired -----------------------------
-                Expires = DateTime.UtcNow.AddSeconds(_jwtSetting.AccessTokenExpiryTimeInSeconds * 12),
+                Expires = DateTime.UtcNow.AddSeconds(_publicKeyDetail.DefaulExpiryTimeInSeconds * 12),
 
                 SigningCredentials = new SigningCredentials(
-                                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key)),
+                                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_publicKeyDetail.Key)),
                                             SecurityAlgorithms.HmacSha256
                                      )
             };
@@ -132,7 +141,7 @@ namespace ems_AuthServiceLayer.Service
                 return new RefreshTokenModal
                 {
                     RefreshToken = Convert.ToBase64String(randomBytes),
-                    Expires = DateTime.UtcNow.AddSeconds(_jwtSetting.RefreshTokenExpiryTimeInSeconds),
+                    Expires = DateTime.UtcNow.AddSeconds(_publicKeyDetail.DefaultRefreshTokenExpiryTimeInSeconds),
                     Created = DateTime.UtcNow,
                     CreatedByIp = ipAddress
                 };
