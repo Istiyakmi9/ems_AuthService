@@ -265,7 +265,9 @@ namespace ems_AuthServiceLayer.Service
                             WorkShiftId = loginDetail.WorkShiftId,
                             RoleId = loginDetail.RoleId,
                             CompanyCode = authUser.CompanyCode,
-                            FinancialYear = currentCompany.FinancialYear
+                            FinancialYear = currentCompany.FinancialYear,
+                            EmployeeCodeLength = currentCompany.EmployeeCodeLength,
+                            EmployeeCodePrefix = currentCompany.EmployeeCodePrefix,
                         };
 
                         loginResponse.UserDetail = userDetail;
