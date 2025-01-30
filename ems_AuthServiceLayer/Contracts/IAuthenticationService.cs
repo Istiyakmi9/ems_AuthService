@@ -4,7 +4,7 @@ namespace ems_AuthServiceLayer.Contracts
 {
     public interface IAuthenticationService
     {
-        public RefreshTokenModal Authenticate(UserDetail userDetail);
+        Task<RefreshTokenModal> Authenticate(UserDetail userDetail);
         string ReadJwtToken();
     }
 }

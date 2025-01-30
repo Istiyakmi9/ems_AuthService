@@ -4,8 +4,8 @@ using Bot.CoreBottomHalf.CommonModal.HtmlTemplateModel;
 using BottomHalf.Utilities.UtilService;
 using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.Services.Code;
-using Bt.Lib.Common.Service.KafkaService.interfaces;
-using Bt.Lib.Common.Service.Model;
+using Bt.Lib.PipelineConfig.KafkaService.interfaces;
+using Bt.Lib.PipelineConfig.Model;
 using CoreBottomHalf.CommonModal.HtmlTemplateModel;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
@@ -271,7 +271,7 @@ namespace ems_AuthServiceLayer.Service
                         };
 
                         loginResponse.UserDetail = userDetail;
-                        var _token = _authenticationService.Authenticate(userDetail);
+                        var _token = await _authenticationService.Authenticate(userDetail);
                         if (_token != null)
                         {
                             userDetail.Token = _token.Token;
@@ -483,18 +483,15 @@ namespace ems_AuthServiceLayer.Service
             return await Task.FromResult(combinedChars);
         }
 
-        public async Task<string> GenerateTokenService(string companyCode)
+        public async Task<string> ReGenerateTokenService()
         {
-            if (string.IsNullOrEmpty(companyCode))
-                throw new Exception("Invalid company code");
-
             UserDetail userDetail = db.Get<UserDetail>("sp_employee_only_by_id", new { EmployeeId = 1, IsActive = true });
             userDetail.RoleId = 1;
-            userDetail.CompanyCode = companyCode;
+            userDetail.CompanyCode = _currentSession.CompanyCode;
             userDetail.EmailId = userDetail.Email;
             userDetail.OrganizationId = 1;
 
-            var refreshTokenModal = _authenticationService.Authenticate(userDetail);
+            var refreshTokenModal = await _authenticationService.Authenticate(userDetail);
             return await Task.FromResult(refreshTokenModal.Token);
         }
     }

@@ -3,8 +3,9 @@ using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.DatabaseLayer.MySql.Code;
 using BottomhalfCore.Services.Code;
 using BottomhalfCore.Services.Interface;
-using Bt.Lib.Common.Service.Middlewares;
-using Bt.Lib.Common.Service.Services;
+using Bt.Lib.PipelineConfig.MicroserviceHttpRequest;
+using Bt.Lib.PipelineConfig.Middlewares;
+using Bt.Lib.PipelineConfig.Services;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using ems_AuthServiceLayer.Service;
@@ -34,8 +35,10 @@ builder.Services.AddSingleton(resolver =>
     resolver.GetRequiredService<IOptions<MicroserviceRegistry>>().Value
 );
 builder.Services.AddSingleton<GitHubConnector>();
+builder.Services.AddScoped<RequestMicroservice>();
+builder.Services.AddHttpClient();
 
-var commonRegistry = new CommonRegistry(builder.Services, builder.Environment, builder.Configuration);
+var commonRegistry = new PipelineRegistry(builder.Services, builder.Environment, builder.Configuration);
 commonRegistry.AddCORS("EmstumCORS")
     .AddPublicKeyConfiguration()
     .AddCurrentSessionClass()
