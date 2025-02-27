@@ -9,7 +9,7 @@ using System.Net;
 namespace ems_AuthService.Controller
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Route("api/[controller]")]
+    [Route("api/auth/[controller]")]
     [ApiController]
     public class LoginController : BaseController
     {
