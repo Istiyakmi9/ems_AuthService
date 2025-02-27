@@ -1,15 +1,17 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
 using BottomhalfCore.DatabaseLayer.Common.Code;
-using Bt.Lib.Common.Service.Model;
-using Bt.Lib.Common.Service.Services;
+using Bt.Lib.PipelineConfig.MicroserviceHttpRequest;
+using Bt.Lib.PipelineConfig.Model;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using Microsoft.IdentityModel.Tokens;
+using ModalLayer.Modal;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Ubiety.Dns.Core;
 
 namespace ems_AuthServiceLayer.Service
 {
@@ -17,20 +19,21 @@ namespace ems_AuthServiceLayer.Service
     {
         private readonly IDb _db;
         private readonly CurrentSession _currentSession;
-        private readonly GitHubConnector _gitHubConnector;
-        private readonly MicroserviceRegistry _microserviceRegistry;
         private readonly PublicKeyDetail _publicKeyDetail;
+        private readonly RequestMicroservice _requestMicroservice;
+        private readonly IHttpClientFactory _httpClientFactory;
+
         public AuthenticationService(IDb db,
             CurrentSession currentSession,
-            GitHubConnector gitHubConnector,
-            MicroserviceRegistry microserviceRegistry,
-            PublicKeyDetail publicKeyDetail)
+            PublicKeyDetail publicKeyDetail,
+            RequestMicroservice requestMicroservice,
+            IHttpClientFactory httpClientFactory)
         {
             _db = db;
             _currentSession = currentSession;
-            _gitHubConnector = gitHubConnector;
-            _microserviceRegistry = microserviceRegistry;
             _publicKeyDetail = publicKeyDetail;
+            _requestMicroservice = requestMicroservice;
+            _httpClientFactory = httpClientFactory;
         }
 
         struct UserClaims
@@ -65,27 +68,51 @@ namespace ems_AuthServiceLayer.Service
             return userId;
         }
 
-        public RefreshTokenModal Authenticate(UserDetail userDetail)
+        public async Task<RefreshTokenModal> Authenticate(UserDetail userDetail)
         {
-            string role = string.Empty;
+            RequestToken requestToken = new RequestToken
+            {
+                CompanyCode = userDetail.CompanyCode,
+                FirstName = userDetail.FirstName,
+                LastName = userDetail.LastName,
+                Email = userDetail.EmailId,
+                UserId = userDetail.UserId,
+                UserDetail = JsonConvert.SerializeObject(userDetail)
+            };
+
             switch (userDetail.RoleId)
             {
                 case 1:
-                    role = Role.Admin;
+                    requestToken.Role = Role.Admin;
                     break;
                 case 2:
-                    role = Role.Employee;
+                    requestToken.Role = Role.Employee;
                     break;
                 case 3:
-                    role = Role.Manager;
+                    requestToken.Role = Role.Manager;
                     break;
             }
 
-            string generatedToken = GenerateAccessToken(userDetail, role);
+            //string generatedToken = GenerateAccessToken(userDetail, role);
+            string generatedToken = await GenerateJwtTokenService(requestToken);
             var refreshToken = GenerateRefreshToken(null);
             refreshToken.Token = generatedToken;
             // SaveRefreshToken(refreshToken, userDetail.UserId);
             return refreshToken;
+        }
+
+        private async Task<string> GenerateJwtTokenService(RequestToken requestToken)
+        {
+            var url = $"https://www.bottomhalf.in/bt/s3/TokenManager/generateToken";
+
+            var client = _httpClientFactory.CreateClient();
+            var content = new StringContent(JsonConvert.SerializeObject(requestToken), Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(url, content);
+            if (!response.IsSuccessStatusCode)
+                throw HiringBellException.ThrowBadRequest($"Request failed with status code {response.StatusCode}");
+
+            return await response.Content.ReadAsStringAsync();
         }
 
         private string GenerateAccessToken(UserDetail userDetail, string role)

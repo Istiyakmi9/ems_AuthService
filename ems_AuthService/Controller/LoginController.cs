@@ -126,12 +126,11 @@ namespace ems_AuthService.Controller
             }
         }
 
-        [AllowAnonymous]
-        [HttpPost("GenerateToken")]
-        public async Task<ApiResponse> GenerateToken([FromBody] CurrentSession currentSession)
+        [HttpGet("ReGenerateToken")]
+        public async Task<ApiResponse> GenerateToken()
         {
-            var userDetail = await loginService.GenerateTokenService(currentSession.CompanyCode);
-            return BuildResponse(userDetail, HttpStatusCode.OK);
+            var token = await loginService.ReGenerateTokenService();
+            return BuildResponse(token, HttpStatusCode.OK);
         }
     }
 }
