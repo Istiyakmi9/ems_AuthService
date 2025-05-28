@@ -1,4 +1,4 @@
-﻿using Bt.Lib.PipelineConfig.KafkaService.interfaces;
+﻿using Bt.Ems.Lib.PipelineConfig.KafkaService.interfaces;
 
 namespace ems_AuthServiceLayer.KafkaService
 {
