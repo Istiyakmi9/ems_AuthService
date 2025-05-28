@@ -1,7 +1,9 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
-using BottomhalfCore.DatabaseLayer.Common.Code;
-using Bt.Lib.PipelineConfig.MicroserviceHttpRequest;
-using Bt.Lib.PipelineConfig.Model;
+using Bt.Ems.Lib.Conf.Const.Models.Constants;
+using Bt.Ems.Lib.PipelineConfig.MicroserviceHttpRequest;
+using Bt.Ems.Lib.PipelineConfig.Model;
+using Bt.Ems.Lib.User.Db.Common;
+using Bt.Ems.Lib.User.Db.Model;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Ubiety.Dns.Core;
+using UserDetail = Bt.Ems.Lib.User.Db.Model.UserDetail;
 
 namespace ems_AuthServiceLayer.Service
 {

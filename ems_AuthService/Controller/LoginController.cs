@@ -1,10 +1,11 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
-using Bot.CoreBottomHalf.CommonModal.API;
+using Bt.Ems.Lib.ApiModels.Models;
 using ems_AuthServiceLayer.Contracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using UserDetail = Bt.Ems.Lib.User.Db.Model.UserDetail;
 
 namespace ems_AuthService.Controller
 {
