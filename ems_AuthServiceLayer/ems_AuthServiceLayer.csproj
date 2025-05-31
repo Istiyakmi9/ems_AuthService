@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="BottomHalf.Utilities" Version="1.0.65" />
     <PackageReference Include="Bt.Ems.Lib.CommonShared" Version="1.0.4" />
-    <PackageReference Include="Bt.Ems.Lib.PipelineConfig" Version="1.0.39" />
+    <PackageReference Include="Bt.Ems.Lib.PipelineConfig" Version="1.0.41" />
     <PackageReference Include="Confluent.Kafka" Version="2.6.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />

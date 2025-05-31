@@ -251,6 +251,8 @@ namespace ems_AuthServiceLayer.Service
                             FullName = $"{loginDetail.FirstName} {loginDetail.LastName}".Trim(),
                             ManagerName = loginDetail.ManagerName,
                             FinancialStartYear = currentCompany.FinancialYear,
+                            OrganizationId = currentCompany.OrganizationId,
+                            DesignationId = loginDetail.DesignationId,
                             CompanyId = currentCompany.CompanyId,
                             CompanyName = currentCompany.CompanyName
                         };
