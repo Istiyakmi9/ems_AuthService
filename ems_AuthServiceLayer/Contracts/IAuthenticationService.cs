@@ -1,10 +1,11 @@
-﻿using Bot.CoreBottomHalf.CommonModal;
+﻿
+using Bt.Ems.Lib.User.Db.Model;
 
 namespace ems_AuthServiceLayer.Contracts
 {
     public interface IAuthenticationService
     {
-        Task<RefreshTokenModal> Authenticate(UserDetail userDetail);
+        Task<Bot.CoreBottomHalf.CommonModal.RefreshTokenModal> Authenticate(UserDetail userDetail);
         string ReadJwtToken();
     }
 }

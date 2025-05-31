@@ -1,11 +1,11 @@
-using Bot.CoreBottomHalf.CommonModal;
-using BottomhalfCore.DatabaseLayer.Common.Code;
-using BottomhalfCore.DatabaseLayer.MySql.Code;
 using BottomhalfCore.Services.Code;
 using BottomhalfCore.Services.Interface;
-using Bt.Lib.PipelineConfig.MicroserviceHttpRequest;
-using Bt.Lib.PipelineConfig.Middlewares;
-using Bt.Lib.PipelineConfig.Services;
+using Bt.Ems.Lib.ApiModels.Models;
+using Bt.Ems.Lib.PipelineConfig.MicroserviceHttpRequest;
+using Bt.Ems.Lib.PipelineConfig.Middlewares;
+using Bt.Ems.Lib.PipelineConfig.Services;
+using Bt.Ems.Lib.User.Db.Common;
+using Bt.Ems.Lib.User.Db.Service.MySql.Code;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using ems_AuthServiceLayer.Service;

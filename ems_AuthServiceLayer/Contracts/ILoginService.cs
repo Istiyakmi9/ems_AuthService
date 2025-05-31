@@ -1,5 +1,6 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
 using ems_AuthServiceLayer.Models;
+using UserDetail = Bt.Ems.Lib.User.Db.Model.UserDetail;
 
 namespace ems_AuthServiceLayer.Contracts
 {

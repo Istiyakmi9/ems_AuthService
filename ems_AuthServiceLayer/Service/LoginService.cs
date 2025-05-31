@@ -1,21 +1,24 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
-using Bot.CoreBottomHalf.CommonModal.Enums;
-using Bot.CoreBottomHalf.CommonModal.HtmlTemplateModel;
 using BottomHalf.Utilities.UtilService;
-using BottomhalfCore.DatabaseLayer.Common.Code;
 using BottomhalfCore.Services.Code;
-using Bt.Lib.PipelineConfig.KafkaService.interfaces;
-using Bt.Lib.PipelineConfig.Model;
-using CoreBottomHalf.CommonModal.HtmlTemplateModel;
+using Bt.Ems.Lib.Conf.Const.Models.Constants;
+using Bt.Ems.Lib.Conf.Const.Models.Constants.enums;
+using Bt.Ems.Lib.Conf.Const.Models.FilesModel;
+using Bt.Ems.Lib.PipelineConfig.KafkaService.interfaces;
+using Bt.Ems.Lib.PipelineConfig.Model;
+using Bt.Ems.Lib.PipelineConfig.Model.KafkaModel;
+using Bt.Ems.Lib.User.Db.Common;
+using Bt.Ems.Lib.User.Db.Model;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using ModalLayer;
 using ModalLayer.Modal;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net.Mail;
+using LoginDetail = Bt.Ems.Lib.User.Db.Model.LoginDetail;
+using UserDetail = Bt.Ems.Lib.User.Db.Model.UserDetail;
 
 namespace ems_AuthServiceLayer.Service
 {
