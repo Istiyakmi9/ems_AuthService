@@ -7,12 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BottomHalf.Utilities" Version="1.0.64" />
-    <PackageReference Include="Bt.Ems.Lib.PipelineConfig" Version="1.0.15" />
+    <PackageReference Include="BottomHalf.Utilities" Version="1.0.65" />
+    <PackageReference Include="Bt.Ems.Lib.CommonShared" Version="1.0.4" />
+    <PackageReference Include="Bt.Ems.Lib.PipelineConfig" Version="1.0.39" />
     <PackageReference Include="Confluent.Kafka" Version="2.6.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.2.0" />
   </ItemGroup>

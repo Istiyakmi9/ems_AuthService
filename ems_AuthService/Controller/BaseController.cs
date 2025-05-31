@@ -1,4 +1,4 @@
-﻿using Bt.Ems.Lib.ApiModels.Models;
+﻿using Bt.Ems.Lib.User.Db.Model.MicroserviceModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ModalLayer.Modal;
@@ -34,13 +34,13 @@ namespace ems_AuthService.Controller
         }
 
         [NonAction]
-        public ApiResponse BuildResponse(dynamic Data, HttpStatusCode httpStatusCode = HttpStatusCode.OK, string Resion = null, string Token = null)
+        public async Task<ApiResponse> BuildResponseAsync(dynamic Data, HttpStatusCode httpStatusCode = HttpStatusCode.OK, string Resion = null, string Token = null)
         {
             apiResponse.AuthenticationToken = Token;
             apiResponse.HttpStatusMessage = Resion;
             apiResponse.HttpStatusCode = httpStatusCode;
             apiResponse.ResponseBody = Data;
-            return apiResponse;
+            return await Task.FromResult(apiResponse);
         }
 
         [NonAction]
