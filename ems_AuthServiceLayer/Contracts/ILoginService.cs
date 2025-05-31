@@ -8,7 +8,7 @@ namespace ems_AuthServiceLayer.Contracts
         Task<string> EncryptDetailService(string text);
         Task<string> DecryptDetailService(string text);
         Task<Tuple<string, string>> GenerateNewRegistrationPassword();
-        Task<AuthResponse> AuthenticateUser(UserDetail authUser);
+        Task<AuthResponse> AuthenticateUser(SignInRequestModel signInRequest);
         Task<AuthResponse> FetchAuthenticatedProviderDetail(UserDetail authUser);
         Task<bool> RegisterNewCompany(RegistrationForm registrationForm);
         Boolean RemoveUserDetailService(string Token);

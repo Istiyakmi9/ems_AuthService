@@ -59,31 +59,24 @@ namespace ems_AuthServiceLayer.Service
             return userDetail;
         }
 
-        public string GetUserLoginDetail(UserDetail authUser)
+        public UserDetail GetUserLoginDetail(SignInRequestModel signInRequest)
         {
-            string encryptedPassword = string.Empty;
+            if (!string.IsNullOrEmpty(signInRequest.Email))
+                signInRequest.Email = signInRequest.Email.Trim().ToLower();
 
-            if (!string.IsNullOrEmpty(authUser.EmailId))
-                authUser.EmailId = authUser.EmailId.Trim().ToLower();
-
-            var loginDetail = db.Get<UserDetail>("sp_password_get_by_email_mobile", new
+            var userDetail = db.Get<UserDetail>("sp_password_get_by_email_mobile", new
             {
-                authUser.UserId,
-                MobileNo = authUser.Mobile,
-                authUser.EmailId
+                signInRequest.UserId,
+                MobileNo = signInRequest.Mobile,
+                signInRequest.Email
             });
 
-            if (loginDetail == null)
+            if (userDetail == null)
                 throw HiringBellException.ThrowBadRequest("Please enter a valid email address or mobile number.");
 
-            encryptedPassword = loginDetail.Password;
-            authUser.OrganizationId = loginDetail.OrganizationId;
-            authUser.CompanyId = loginDetail.CompanyId;
-            authUser.UserTypeId = loginDetail.UserTypeId;
+            ValidePasswordStatus(userDetail);
 
-            ValidePasswordStatus(loginDetail);
-
-            return encryptedPassword;
+            return userDetail;
         }
 
         private void ValidePasswordStatus(LoginDetail loginDetail)
@@ -153,19 +146,19 @@ namespace ems_AuthServiceLayer.Service
             return loginResponse;
         }
 
-        public async Task<AuthResponse> AuthenticateUser(UserDetail authUser)
+        public async Task<AuthResponse> AuthenticateUser(SignInRequestModel signInRequest)
         {
             AuthResponse loginResponse = default;
-            if ((!string.IsNullOrEmpty(authUser.EmailId) || !string.IsNullOrEmpty(authUser.Mobile)) && !string.IsNullOrEmpty(authUser.Password))
+            if ((!string.IsNullOrEmpty(signInRequest.Email) || !string.IsNullOrEmpty(signInRequest.Mobile)) && !string.IsNullOrEmpty(signInRequest.Password))
             {
-                var encryptedPassword = this.GetUserLoginDetail(authUser);
-                encryptedPassword = UtilService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
-                if (encryptedPassword.CompareTo(authUser.Password) != 0)
+                var userDetail = this.GetUserLoginDetail(signInRequest);
+                var encryptedPassword = UtilService.Decrypt(userDetail.Password, _configuration.GetSection("EncryptSecret").Value);
+                if (encryptedPassword.CompareTo(signInRequest.Password) != 0)
                 {
                     throw  HiringBellException.ThrowBadRequest("Invalid userId or password.");
                 }
 
-                loginResponse = await FetchUserDetail(authUser, "sp_Employeelogin_Auth");
+                loginResponse = await FetchUserDetail(userDetail, "sp_Employeelogin_Auth");
 
                 if (await CheckOrganizationSetup())
                 {

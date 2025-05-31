@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\bottomhalf\emstum\Bt.Ems.Libraries\Bt.Ems.Lib.PipelineConfig\Bt.Ems.Lib.PipelineConfig.csproj" />
     <ProjectReference Include="..\ems_AuthServiceLayer\ems_AuthServiceLayer.csproj" />
   </ItemGroup>
 

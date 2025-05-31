@@ -1,6 +1,7 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
 using Bot.CoreBottomHalf.CommonModal.API;
 using ems_AuthServiceLayer.Contracts;
+using ems_AuthServiceLayer.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,16 +50,16 @@ namespace ems_AuthService.Controller
         [HttpPost]
         [AllowAnonymous]
         [Route("Authenticate")]
-        public async Task<ApiResponse> Authenticate(UserDetail authUser)
+        public async Task<ApiResponse> Authenticate(SignInRequestModel signInRequest)
         {
             try
             {
-                var userDetail = await this.loginService.AuthenticateUser(authUser);
+                var userDetail = await this.loginService.AuthenticateUser(signInRequest);
                 return BuildResponse(userDetail, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
-                throw Throw(ex, authUser);
+                throw Throw(ex, signInRequest);
             }
         }
 
