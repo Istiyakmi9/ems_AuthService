@@ -5,7 +5,7 @@ namespace ems_AuthServiceLayer.Contracts
 {
     public interface IAuthenticationService
     {
-        Task<Bot.CoreBottomHalf.CommonModal.RefreshTokenModal> Authenticate(UserDetail userDetail);
+        Task<Bot.CoreBottomHalf.CommonModal.RefreshTokenModal> Authenticate(CurrentSession session);
         string ReadJwtToken();
     }
 }
