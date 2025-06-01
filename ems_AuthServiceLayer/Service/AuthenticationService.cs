@@ -96,6 +96,7 @@ namespace ems_AuthServiceLayer.Service
             {
                 { ApplicationConstants.CurrentSession, JsonConvert.SerializeObject(session) },
                 { ApplicationConstants.CompanyCode, _currentSession.CompanyCode },
+                { ClaimTypes.Role, role },
             };
 
             string generatedToken = await GenerateJwtTokenService(claims);
