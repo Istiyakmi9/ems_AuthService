@@ -96,6 +96,7 @@ namespace ems_AuthServiceLayer.Service
             {
                 { ApplicationConstants.CurrentSession, JsonConvert.SerializeObject(session) },
                 { ApplicationConstants.CompanyCode, _currentSession.CompanyCode },
+                { ClaimTypes.Role, role },
             };
 
             string generatedToken = await GenerateJwtTokenService(claims);
@@ -107,14 +108,15 @@ namespace ems_AuthServiceLayer.Service
         private async Task<string> GenerateJwtTokenService(Dictionary<string, string> claims)
         {
             string url = string.Empty;
-            if (_env.IsProduction())
-            {
-                url = $"https://www.bottomhalf.in/bt/s3/TokenManager/generateToken";
-            }
-            else
-            {
-                url = $"http://localhost:5052/bt/s3/TokenManager/generateToken";
-            }
+            //if (_env.IsProduction())
+            //{
+            //    url = $"https://www.bottomhalf.in/bt/s3/TokenManager/generateToken";
+            //}
+            //else
+            //{
+            //    url = $"http://localhost:5052/bt/s3/TokenManager/generateToken";
+            //}
+            url = $"https://www.bottomhalf.in/bt/s3/TokenManager/generateToken";
 
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(JsonConvert.SerializeObject(claims), Encoding.UTF8, "application/json");

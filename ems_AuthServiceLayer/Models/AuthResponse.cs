@@ -8,7 +8,7 @@ namespace ems_AuthServiceLayer.Models
     {
         public UserDetail UserDetail { get; set; }
         public DataTable Menu { get; set; }
-        public List<Organization> Companies { get; set; }
+        public List<CompanyDetail> Companies { get; set; }
         public int UserTypeId { get; set; }
         public DataTable Department { get; set; }
         public DataTable Roles { get; set; }
