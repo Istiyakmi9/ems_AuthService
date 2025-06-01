@@ -11,6 +11,7 @@ using Bt.Ems.Lib.User.Db.Common;
 using Bt.Ems.Lib.User.Db.Model;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using ModalLayer.Modal;
@@ -31,11 +32,11 @@ namespace ems_AuthServiceLayer.Service
         private readonly CurrentSession _currentSession;
         private readonly IKafkaProducerService _kafkaProducerService;
         private readonly PublicKeyDetail _publicKeyDetail;
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public LoginService(IDb db, IOptions<JwtSetting> options,
             IAuthenticationService authenticationService,
             IConfiguration configuration,
-            CurrentSession currentSession, IKafkaProducerService kafkaProducerService, PublicKeyDetail publicKeyDetail)
+            CurrentSession currentSession, IKafkaProducerService kafkaProducerService, PublicKeyDetail publicKeyDetail, IHttpContextAccessor httpContextAccessor)
         {
             this.db = db;
             _configuration = configuration;
@@ -44,6 +45,7 @@ namespace ems_AuthServiceLayer.Service
             _currentSession = currentSession;
             _kafkaProducerService = kafkaProducerService;
             _publicKeyDetail = publicKeyDetail;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public Boolean RemoveUserDetailService(string Token)
@@ -255,7 +257,8 @@ namespace ems_AuthServiceLayer.Service
                             DesignationId = loginDetail.DesignationId,
                             TimeZoneName = currentCompany.TimezoneName,
                             CompanyId = currentCompany.CompanyId,
-                            CompanyName = currentCompany.CompanyName
+                            CompanyName = currentCompany.CompanyName,
+                            CompanyCode = GetCompanyCode()
                         };
 
 
@@ -304,6 +307,16 @@ namespace ems_AuthServiceLayer.Service
             }
 
             return loginResponse;
+        }
+
+        private string GetCompanyCode()
+        {
+            var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
+            string companyCode = "";
+            if (headers != null && headers.TryGetValue("companyCode", out var companycode))
+                companyCode = companycode.ToString();
+
+            return companyCode;
         }
 
         public string ResetEmployeePassword(UserDetail authUser)
