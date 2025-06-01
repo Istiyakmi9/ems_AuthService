@@ -215,7 +215,7 @@ namespace ems_AuthServiceLayer.Service
                     loginResponse.Department = ds.Tables[3];
                     loginResponse.Roles = ds.Tables[4];
                     loginResponse.UserTypeId = authUser.UserTypeId;
-                    var companies = Converter.ToList<Organization>(ds.Tables[5]);
+                    var companies = Converter.ToList<CompanyDetail>(ds.Tables[5]);
                     Files file = Converter.ToType<Files>(ds.Tables[7]);
                     if (ds.Tables[6].Rows.Count > 0 && ds.Tables[6].Rows[0][1] != DBNull.Value)
                     {
@@ -253,6 +253,7 @@ namespace ems_AuthServiceLayer.Service
                             FinancialStartYear = currentCompany.FinancialYear,
                             OrganizationId = currentCompany.OrganizationId,
                             DesignationId = loginDetail.DesignationId,
+                            TimeZoneName = currentCompany.TimezoneName,
                             CompanyId = currentCompany.CompanyId,
                             CompanyName = currentCompany.CompanyName
                         };
