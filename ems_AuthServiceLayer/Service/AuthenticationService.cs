@@ -1,11 +1,14 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
-using Bt.Ems.Lib.Conf.Const.Models.Constants;
 using Bt.Ems.Lib.PipelineConfig.MicroserviceHttpRequest;
 using Bt.Ems.Lib.PipelineConfig.Model;
+using Bt.Ems.Lib.PipelineConfig.Model.Constants;
+using Bt.Ems.Lib.PipelineConfig.Model.ExceptionModel;
 using Bt.Ems.Lib.User.Db.Common;
 using Bt.Ems.Lib.User.Db.Model;
 using ems_AuthServiceLayer.Contracts;
 using ems_AuthServiceLayer.Models;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using ModalLayer.Modal;
 using Newtonsoft.Json;
@@ -24,18 +27,21 @@ namespace ems_AuthServiceLayer.Service
         private readonly PublicKeyDetail _publicKeyDetail;
         private readonly RequestMicroservice _requestMicroservice;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IWebHostEnvironment _env;
 
         public AuthenticationService(IDb db,
             CurrentSession currentSession,
             PublicKeyDetail publicKeyDetail,
             RequestMicroservice requestMicroservice,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IWebHostEnvironment env)
         {
             _db = db;
             _currentSession = currentSession;
             _publicKeyDetail = publicKeyDetail;
             _requestMicroservice = requestMicroservice;
             _httpClientFactory = httpClientFactory;
+            _env = env;
         }
 
         struct UserClaims
@@ -70,49 +76,54 @@ namespace ems_AuthServiceLayer.Service
             return userId;
         }
 
-        public async Task<RefreshTokenModal> Authenticate(UserDetail userDetail)
+        public async Task<RefreshTokenModal> Authenticate(CurrentSession session)
         {
-            RequestToken requestToken = new RequestToken
-            {
-                CompanyCode = userDetail.CompanyCode,
-                FirstName = userDetail.FirstName,
-                LastName = userDetail.LastName,
-                Email = userDetail.EmailId,
-                UserId = userDetail.UserId,
-                UserDetail = JsonConvert.SerializeObject(userDetail)
-            };
-
-            switch (userDetail.RoleId)
+            string role = string.Empty;
+            switch (session.RoleId)
             {
                 case 1:
-                    requestToken.Role = Role.Admin;
+                    role = Role.Admin;
                     break;
                 case 2:
-                    requestToken.Role = Role.Employee;
+                    role = Role.Employee;
                     break;
                 case 3:
-                    requestToken.Role = Role.Manager;
+                    role = Role.Manager;
                     break;
             }
 
-            //string generatedToken = GenerateAccessToken(userDetail, role);
-            string generatedToken = await GenerateJwtTokenService(requestToken);
+            var claims = new Dictionary<string, string>
+            {
+                { ApplicationConstants.CurrentSession, JsonConvert.SerializeObject(session) },
+                { ApplicationConstants.CompanyCode, _currentSession.CompanyCode },
+                { ClaimTypes.Role, role },
+            };
+
+            string generatedToken = await GenerateJwtTokenService(claims);
             var refreshToken = GenerateRefreshToken(null);
             refreshToken.Token = generatedToken;
-            // SaveRefreshToken(refreshToken, userDetail.UserId);
             return refreshToken;
         }
 
-        private async Task<string> GenerateJwtTokenService(RequestToken requestToken)
+        private async Task<string> GenerateJwtTokenService(Dictionary<string, string> claims)
         {
-            var url = $"https://www.bottomhalf.in/bt/s3/TokenManager/generateToken";
+            string url = string.Empty;
+            //if (_env.IsProduction())
+            //{
+            //    url = $"https://www.bottomhalf.in/bt/s3/TokenManager/generateToken";
+            //}
+            //else
+            //{
+            //    url = $"http://localhost:5052/bt/s3/TokenManager/generateToken";
+            //}
+            url = $"https://www.bottomhalf.in/bt/s3/TokenManager/generateToken";
 
             var client = _httpClientFactory.CreateClient();
-            var content = new StringContent(JsonConvert.SerializeObject(requestToken), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(claims), Encoding.UTF8, "application/json");
 
             var response = await client.PostAsync(url, content);
             if (!response.IsSuccessStatusCode)
-                throw HiringBellException.ThrowBadRequest($"Request failed with status code {response.StatusCode}");
+                throw EmstumException.ThrowBadRequest($"Request failed with status code {response.StatusCode}");
 
             return await response.Content.ReadAsStringAsync();
         }

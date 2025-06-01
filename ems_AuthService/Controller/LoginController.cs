@@ -1,6 +1,7 @@
 ﻿using Bot.CoreBottomHalf.CommonModal;
-using Bt.Ems.Lib.ApiModels.Models;
+using Bt.Ems.Lib.User.Db.Model.MicroserviceModel;
 using ems_AuthServiceLayer.Contracts;
+using ems_AuthServiceLayer.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,10 +24,10 @@ namespace ems_AuthService.Controller
 
         [HttpGet]
         [Route("LogoutUser")]
-        public IResponse<ApiResponse> LogoutUser(string Token)
+        public async Task<ApiResponse> LogoutUser(string Token)
         {
             bool ResultFlag = this.loginService.RemoveUserDetailService(Token);
-            return BuildResponse(ResultFlag, HttpStatusCode.OK);
+            return await BuildResponseAsync(ResultFlag, HttpStatusCode.OK);
         }
 
         [HttpPost]
@@ -35,7 +36,7 @@ namespace ems_AuthService.Controller
         public async Task<ApiResponse> SignUpNew(RegistrationForm registrationForm)
         {
             var userDetail = await this.loginService.RegisterNewCompany(registrationForm);
-            return BuildResponse(userDetail, HttpStatusCode.OK);
+            return await BuildResponseAsync(userDetail, HttpStatusCode.OK);
         }
 
         [HttpPost]
@@ -44,22 +45,22 @@ namespace ems_AuthService.Controller
         public async Task<ApiResponse> AuthenticateProvider(UserDetail authUser)
         {
             var userDetail = await this.loginService.FetchAuthenticatedProviderDetail(authUser);
-            return BuildResponse(userDetail, HttpStatusCode.OK);
+            return await BuildResponseAsync(userDetail, HttpStatusCode.OK);
         }
 
         [HttpPost]
         [AllowAnonymous]
         [Route("Authenticate")]
-        public async Task<ApiResponse> Authenticate(UserDetail authUser)
+        public async Task<ApiResponse> Authenticate(SignInRequestModel signInRequest)
         {
             try
             {
-                var userDetail = await this.loginService.AuthenticateUser(authUser);
-                return BuildResponse(userDetail, HttpStatusCode.OK);
+                var userDetail = await this.loginService.AuthenticateUser(signInRequest);
+                return await BuildResponseAsync(userDetail, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
-                throw Throw(ex, authUser);
+                throw Throw(ex, signInRequest);
             }
         }
 
@@ -69,7 +70,7 @@ namespace ems_AuthService.Controller
         public async Task<ApiResponse> GenerateTempraryPassword()
         {
             var userDetail = await this.loginService.GenerateNewRegistrationPassword();
-            return BuildResponse(userDetail.Item1, HttpStatusCode.OK, string.Empty, userDetail.Item2);
+            return await BuildResponseAsync(userDetail.Item1, HttpStatusCode.OK, string.Empty, userDetail.Item2);
         }
 
         [HttpGet]
@@ -78,7 +79,7 @@ namespace ems_AuthService.Controller
         public async Task<ApiResponse> DecryptDetail(string text)
         {
             var result = await this.loginService.DecryptDetailService(text);
-            return BuildResponse(result, HttpStatusCode.OK);
+            return await BuildResponseAsync(result, HttpStatusCode.OK);
         }
 
         [HttpGet]
@@ -87,24 +88,24 @@ namespace ems_AuthService.Controller
         public async Task<ApiResponse> EncryptDetail(string text)
         {
             var result = await this.loginService.EncryptDetailService(text);
-            return BuildResponse(result, HttpStatusCode.OK);
+            return await BuildResponseAsync(result, HttpStatusCode.OK);
         }
 
         [HttpPost]
         [Route("GetUserDetail")]
-        public IResponse<ApiResponse> GetUserDetail(AuthUser authUser)
+        public async Task<ApiResponse> GetUserDetail(AuthUser authUser)
         {
             var userDetail = this.loginService.GetUserDetail(authUser);
-            return BuildResponse(userDetail, HttpStatusCode.OK);
+            return await BuildResponseAsync(userDetail, HttpStatusCode.OK);
         }
 
         [HttpPost("ResetEmployeePassword")]
-        public IResponse<ApiResponse> ResetEmployeePassword(UserDetail authUser)
+        public async Task<ApiResponse> ResetEmployeePassword(UserDetail authUser)
         {
             try
             {
                 var result = this.loginService.ResetEmployeePassword(authUser);
-                return BuildResponse(result, HttpStatusCode.OK);
+                return await BuildResponseAsync(result, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -119,7 +120,7 @@ namespace ems_AuthService.Controller
             try
             {
                 var result = await this.loginService.ForgotPasswordService(user.EmailId);
-                return BuildResponse(result, HttpStatusCode.OK);
+                return await BuildResponseAsync(result, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -131,7 +132,7 @@ namespace ems_AuthService.Controller
         public async Task<ApiResponse> GenerateToken()
         {
             var token = await loginService.ReGenerateTokenService();
-            return BuildResponse(token, HttpStatusCode.OK);
+            return await BuildResponseAsync(token, HttpStatusCode.OK);
         }
     }
 }
