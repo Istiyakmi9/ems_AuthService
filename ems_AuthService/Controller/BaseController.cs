@@ -1,7 +1,7 @@
-﻿using Bt.Ems.Lib.User.Db.Model.MicroserviceModel;
+﻿using Bt.Ems.Lib.PipelineConfig.Model.ExceptionModel;
+using Bt.Ems.Lib.User.Db.Model.MicroserviceModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ModalLayer.Modal;
 using Newtonsoft.Json;
 using System.Net;
 
@@ -18,19 +18,15 @@ namespace ems_AuthService.Controller
         }
 
         [NonAction]
-        public HiringBellException Throw(Exception ex, dynamic request = null)
+        public EmstumException Throw(Exception ex, dynamic request = null)
         {
-            try
-            {
-                HiringBellException exception = (HiringBellException)ex;
-                return new HiringBellException(exception.UserMessage, JsonConvert.SerializeObject(request), ex);
-            }
-            catch
-            {
-                Console.WriteLine("This is not a HiringBellException");
-            }
+            return new EmstumException(ex.Message, JsonConvert.SerializeObject(request), ex);
+        }
 
-            return new HiringBellException(ex.Message, JsonConvert.SerializeObject(request), ex);
+        [NonAction]
+        public EmstumException Throw(EmstumException ex, dynamic request = null)
+        {
+            return new EmstumException(ex.UserMessage, JsonConvert.SerializeObject(request), ex);
         }
 
         [NonAction]

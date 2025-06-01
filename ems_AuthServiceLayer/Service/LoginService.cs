@@ -6,6 +6,7 @@ using Bt.Ems.Lib.CommonShared.FilesModel;
 using Bt.Ems.Lib.PipelineConfig.KafkaService.interfaces;
 using Bt.Ems.Lib.PipelineConfig.Model;
 using Bt.Ems.Lib.PipelineConfig.Model.Constants;
+using Bt.Ems.Lib.PipelineConfig.Model.ExceptionModel;
 using Bt.Ems.Lib.PipelineConfig.Model.KafkaModel;
 using Bt.Ems.Lib.User.Db.Common;
 using Bt.Ems.Lib.User.Db.Model;
@@ -209,7 +210,7 @@ namespace ems_AuthServiceLayer.Service
                     loginResponse.Menu = ds.Tables[1];
                     if (loginResponse.Menu.Rows.Count == 0)
                     {
-                        throw HiringBellException.ThrowBadRequest("Menu not found for the current user.");
+                        throw EmstumException.ThrowBadRequest("Menu not found for the current user.");
                     }
 
                     loginResponse.Department = ds.Tables[3];

@@ -53,15 +53,8 @@ namespace ems_AuthService.Controller
         [Route("Authenticate")]
         public async Task<ApiResponse> Authenticate(SignInRequestModel signInRequest)
         {
-            try
-            {
-                var userDetail = await this.loginService.AuthenticateUser(signInRequest);
-                return await BuildResponseAsync(userDetail, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                throw Throw(ex, signInRequest);
-            }
+            var userDetail = await this.loginService.AuthenticateUser(signInRequest);
+            return await BuildResponseAsync(userDetail, HttpStatusCode.OK);
         }
 
         [HttpGet]
@@ -102,30 +95,16 @@ namespace ems_AuthService.Controller
         [HttpPost("ResetEmployeePassword")]
         public async Task<ApiResponse> ResetEmployeePassword(UserDetail authUser)
         {
-            try
-            {
-                var result = this.loginService.ResetEmployeePassword(authUser);
-                return await BuildResponseAsync(result, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                throw Throw(ex, authUser);
-            }
+            var result = this.loginService.ResetEmployeePassword(authUser);
+            return await BuildResponseAsync(result, HttpStatusCode.OK);
         }
 
         [HttpPost("ForgotPassword")]
         [AllowAnonymous]
         public async Task<ApiResponse> ForgotPassword([FromBody] UserDetail user)
         {
-            try
-            {
-                var result = await this.loginService.ForgotPasswordService(user.EmailId);
-                return await BuildResponseAsync(result, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                throw Throw(ex, user);
-            }
+            var result = await this.loginService.ForgotPasswordService(user.EmailId);
+            return await BuildResponseAsync(result, HttpStatusCode.OK);
         }
 
         [HttpGet("ReGenerateToken")]
