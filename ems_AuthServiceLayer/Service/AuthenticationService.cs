@@ -95,7 +95,7 @@ namespace ems_AuthServiceLayer.Service
             var claims = new Dictionary<string, string>
             {
                 { ApplicationConstants.CurrentSession, JsonConvert.SerializeObject(session) },
-                { ApplicationConstants.CompanyCode, _currentSession.CompanyCode },
+                { ApplicationConstants.CompanyCode, session.CompanyCode },
                 { ClaimTypes.Role, role },
             };
 
