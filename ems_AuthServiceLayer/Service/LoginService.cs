@@ -78,7 +78,7 @@ namespace ems_AuthServiceLayer.Service
             });
 
             if (userDetail == null)
-                throw HiringBellException.ThrowBadRequest("Please enter a valid email address or mobile number.");
+                throw EmstumException.ThrowBadRequest("Please enter a valid email address or mobile number.");
 
             ValidePasswordStatus(userDetail);
 
@@ -96,12 +96,12 @@ namespace ems_AuthServiceLayer.Service
                 });
 
                 if (applicationSettings == null || string.IsNullOrEmpty(applicationSettings.SettingDetails))
-                    throw HiringBellException.ThrowBadRequest("Your password got expired. Please contact to admin.");
+                    throw EmstumException.ThrowBadRequest("Your password got expired. Please contact to admin.");
 
                 var passwordSettings = JsonConvert.DeserializeObject<PasswordSettings>(applicationSettings.SettingDetails);
 
                 if (DateTime.UtcNow.Subtract(loginDetail.UpdatedOn).TotalSeconds > passwordSettings.TemporaryPasswordExpiryTimeInSeconds)
-                    throw HiringBellException.ThrowBadRequest("Your temporary password got expired. Please reset again.");
+                    throw EmstumException.ThrowBadRequest("Your temporary password got expired. Please reset again.");
             }
         }
 
@@ -128,7 +128,7 @@ namespace ems_AuthServiceLayer.Service
             }
             else
             {
-                throw new HiringBellException("Fail to retrieve user detail.", "UserDetail", JsonConvert.SerializeObject(authUser));
+                throw new EmstumException("Fail to retrieve user detail.", "UserDetail", JsonConvert.SerializeObject(authUser));
             }
 
             return encryptedPassword;
@@ -141,7 +141,7 @@ namespace ems_AuthServiceLayer.Service
             else if (authUser.UserTypeId == (int)UserType.Employee)
                 ProcedureName = "sp_Employeelogin_Auth";
             else
-                throw new HiringBellException("UserType is invalid. Only system user allowed");
+                throw new EmstumException("UserType is invalid. Only system user allowed");
 
             AuthResponse loginResponse = default;
             if ((!string.IsNullOrEmpty(authUser.EmailId) || !string.IsNullOrEmpty(authUser.Mobile)) && !string.IsNullOrEmpty(authUser.Password))
@@ -161,7 +161,7 @@ namespace ems_AuthServiceLayer.Service
                 var encryptedPassword = UtilService.Decrypt(userDetail.Password, _configuration.GetSection("EncryptSecret").Value);
                 if (encryptedPassword.CompareTo(signInRequest.Password) != 0)
                 {
-                    throw HiringBellException.ThrowBadRequest("Invalid userId or password.");
+                    throw EmstumException.ThrowBadRequest("Invalid userId or password.");
                 }
 
                 loginResponse = await FetchUserDetail(userDetail, "sp_Employeelogin_Auth");
@@ -302,7 +302,7 @@ namespace ems_AuthServiceLayer.Service
                     }
                     else
                     {
-                        throw HiringBellException.ThrowBadRequest("Fail to get user detail. Please contact to admin.");
+                        throw EmstumException.ThrowBadRequest("Fail to get user detail. Please contact to admin.");
                     }
                 }
             }
@@ -326,7 +326,7 @@ namespace ems_AuthServiceLayer.Service
             var encryptedPassword = this.FetchUserLoginDetail(authUser);
             encryptedPassword = UtilService.Decrypt(encryptedPassword, _configuration.GetSection("EncryptSecret").Value);
             if (encryptedPassword != authUser.Password)
-                throw new HiringBellException("Incorrect old password");
+                throw new EmstumException("Incorrect old password");
 
             string newEncryptedPassword = UtilService.Encrypt(authUser.NewPassword, _configuration.GetSection("EncryptSecret").Value);
             var result = db.Execute<string>("sp_Reset_Password", new
@@ -343,7 +343,7 @@ namespace ems_AuthServiceLayer.Service
             }
             else
             {
-                throw new HiringBellException("Unable to update your password");
+                throw new EmstumException("Unable to update your password");
             }
 
             return Status;
@@ -355,19 +355,19 @@ namespace ems_AuthServiceLayer.Service
             {
                 bool statusFlag = false;
                 if (string.IsNullOrEmpty(registrationForm.OrganizationName))
-                    throw new HiringBellException { UserMessage = $"Invalid Organization name passed: {registrationForm.OrganizationName}" };
+                    throw new EmstumException { UserMessage = $"Invalid Organization name passed: {registrationForm.OrganizationName}" };
 
                 if (string.IsNullOrEmpty(registrationForm.CompanyName))
-                    throw new HiringBellException { UserMessage = $"Invalid Company name passed: {registrationForm.CompanyName}" };
+                    throw new EmstumException { UserMessage = $"Invalid Company name passed: {registrationForm.CompanyName}" };
 
                 if (string.IsNullOrEmpty(registrationForm.Mobile))
-                    throw new HiringBellException { UserMessage = $"Invalid Mobile number: {registrationForm.Mobile}" };
+                    throw new EmstumException { UserMessage = $"Invalid Mobile number: {registrationForm.Mobile}" };
 
                 if (string.IsNullOrEmpty(registrationForm.EmailId))
-                    throw new HiringBellException { UserMessage = $"Invalid Email address passed: {registrationForm.EmailId}" };
+                    throw new EmstumException { UserMessage = $"Invalid Email address passed: {registrationForm.EmailId}" };
 
                 if (string.IsNullOrEmpty(registrationForm.AuthenticationCode))
-                    throw new HiringBellException { UserMessage = $"Invalid Authentication Code passed: {registrationForm.AuthenticationCode}" };
+                    throw new EmstumException { UserMessage = $"Invalid Authentication Code passed: {registrationForm.AuthenticationCode}" };
 
                 registrationForm.FirstName = "Admin";
                 registrationForm.LastName = "User";
@@ -404,7 +404,7 @@ namespace ems_AuthServiceLayer.Service
                 var encryptedPassword = this.FetchUserLoginDetail(authUser);
 
                 if (string.IsNullOrEmpty(encryptedPassword))
-                    throw new HiringBellException("Email id is not registered. Please contact to admin");
+                    throw new EmstumException("Email id is not registered. Please contact to admin");
 
                 string newPassword = await GenerateRandomPassword(10);
                 var enNewPassword = UtilService.Encrypt(newPassword, _configuration.GetSection("EncryptSecret").Value);
@@ -419,7 +419,7 @@ namespace ems_AuthServiceLayer.Service
 
                 if (result.ToLower() != ApplicationConstants.Updated)
                 {
-                    throw new HiringBellException("Unable to reset your password");
+                    throw new EmstumException("Unable to reset your password");
                 }
 
                 //await _forgotPasswordEmailService.SendForgotPasswordEmail(password, email);
@@ -438,19 +438,19 @@ namespace ems_AuthServiceLayer.Service
             }
             catch (Exception)
             {
-                throw new HiringBellException("Getting some server error. Please contact to admin.");
+                throw new EmstumException("Getting some server error. Please contact to admin.");
             }
         }
 
         private void ValidateEmailId(string email)
         {
             if (string.IsNullOrEmpty(email))
-                throw new HiringBellException("Email is null or empty");
+                throw new EmstumException("Email is null or empty");
 
             var mail = new MailAddress(email);
             bool isValidEmail = mail.Host.Contains(".");
             if (!isValidEmail)
-                throw new HiringBellException("The email is invalid");
+                throw new EmstumException("The email is invalid");
         }
 
         public async Task<Tuple<string, string>> GenerateNewRegistrationPassword()
