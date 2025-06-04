@@ -285,7 +285,7 @@ namespace ems_AuthServiceLayer.Service
                             CreatedOn = loginDetail.CreatedOn,
                             WorkShiftId = loginDetail.WorkShiftId,
                             RoleId = loginDetail.RoleId,
-                            CompanyCode = authUser.CompanyCode,
+                            CompanyCode = GetCompanyCode(),
                             FinancialYear = currentCompany.FinancialYear,
                             EmployeeCodeLength = currentCompany.EmployeeCodeLength,
                             EmployeeCodePrefix = currentCompany.EmployeeCodePrefix,
