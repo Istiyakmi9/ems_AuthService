@@ -526,15 +526,20 @@ namespace ems_AuthServiceLayer.Service
                 UserId = userDetail.UserId,
                 EmployeeCodeLength = userDetail.EmployeeCodeLength,
                 EmployeeCodePrefix = userDetail.EmployeeCodePrefix,
-                ReportingManagerId = userDetail.ReportingManagerId,
-                ManagerEmail = userDetail.ManagerEmailId,
+                ReportingManagerId = _currentSession.ReportingManagerId,
+                ManagerEmail = _currentSession.ManagerEmail,
                 RoleId = userDetail.RoleId,
                 Email = userDetail.EmailId,
                 Mobile = userDetail.Mobile,
-                FullName = $"{userDetail.FirstName} {userDetail.FirstName}".Trim(),
-                ManagerName = userDetail.ManagerName,
+                FullName = $"{userDetail.FirstName} {userDetail.LastName}".Trim(),
+                ManagerName = _currentSession.ManagerName,
                 FinancialStartYear = userDetail.FinancialYear,
-                CompanyCode = userDetail.CompanyCode,
+                CompanyCode = _currentSession.CompanyCode,
+                OrganizationId = _currentSession.OrganizationId,
+                DesignationId = userDetail.DesignationId,
+                TimeZoneName = _currentSession.TimeZoneName,
+                CompanyId = userDetail.CompanyId,
+                CompanyName = userDetail.CompanyName
             };
 
             var refreshTokenModal = await _authenticationService.Authenticate(session);
